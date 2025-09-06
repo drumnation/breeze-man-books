@@ -6,9 +6,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeftIcon } from 'lucide-react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
 import { z } from 'zod';
 
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
@@ -40,6 +39,7 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from '@kit/ui/input-otp';
+import { toast } from '@kit/ui/sonner';
 import { Trans } from '@kit/ui/trans';
 
 export function MultiFactorAuthSetupDialog(props: { userId: string }) {
@@ -49,7 +49,7 @@ export function MultiFactorAuthSetupDialog(props: { userId: string }) {
   const onEnrollSuccess = useCallback(() => {
     setIsOpen(false);
 
-    return toast.success(t(`multiFactorSetupSuccess`));
+    return toast.success(t(`account:multiFactorSetupSuccess`));
   }, [t]);
 
   return (
@@ -87,15 +87,15 @@ export function MultiFactorAuthSetupDialog(props: { userId: string }) {
 }
 
 function MultiFactorAuthSetupForm({
-  userId,
   onEnrolled,
   onCancel,
+  userId,
 }: React.PropsWithChildren<{
   userId: string;
   onCancel: () => void;
   onEnrolled: () => void;
 }>) {
-  const verifyCodeMutation = useVerifyCodeMutation({ userId });
+  const verifyCodeMutation = useVerifyCodeMutation(userId);
 
   const verificationCodeForm = useForm({
     resolver: zodResolver(
@@ -113,6 +113,11 @@ function MultiFactorAuthSetupForm({
   const [state, setState] = useState({
     loading: false,
     error: '',
+  });
+
+  const factorId = useWatch({
+    name: 'factorId',
+    control: verificationCodeForm.control,
   });
 
   const onSubmit = useCallback(
@@ -153,17 +158,7 @@ function MultiFactorAuthSetupForm({
   );
 
   if (state.error) {
-    return (
-      <div className={'flex flex-col space-y-4'}>
-        <ErrorAlert />
-
-        <div className={'flex justify-end'}>
-          <Button type={'button'} variant={'ghost'} onClick={onCancel}>
-            <Trans i18nKey={'common:cancel'} />
-          </Button>
-        </div>
-      </div>
-    );
+    return <ErrorAlert />;
   }
 
   return (
@@ -178,7 +173,7 @@ function MultiFactorAuthSetupForm({
         />
       </div>
 
-      <If condition={verificationCodeForm.watch('factorId')}>
+      <If condition={factorId}>
         <Form {...verificationCodeForm}>
           <form
             onSubmit={verificationCodeForm.handleSubmit(onSubmit)}
@@ -228,7 +223,9 @@ function MultiFactorAuthSetupForm({
                 </Button>
 
                 <Button
-                  disabled={!verificationCodeForm.formState.isValid}
+                  disabled={
+                    !verificationCodeForm.formState.isValid || state.loading
+                  }
                   type={'submit'}
                 >
                   {state.loading ? (
@@ -255,7 +252,7 @@ function FactorQrCode({
   onCancel: () => void;
   onSetFactorId: (factorId: string) => void;
 }>) {
-  const enrollFactorMutation = useEnrollFactor({ userId });
+  const enrollFactorMutation = useEnrollFactor(userId);
   const { t } = useTranslation();
   const [error, setError] = useState<string>('');
 
@@ -272,7 +269,7 @@ function FactorQrCode({
     },
   });
 
-  const factorName = form.watch('factorName');
+  const factorName = useWatch({ name: 'factorName', control: form.control });
 
   if (error) {
     return (
@@ -318,17 +315,21 @@ function FactorQrCode({
           if (data.type === 'totp') {
             form.setValue('factorName', name);
             form.setValue('qrCode', data.totp.qr_code);
-
-            // dispatch event to set factor ID
-            onSetFactorId(data.id);
           }
+
+          // dispatch event to set factor ID
+          onSetFactorId(data.id);
         }}
       />
     );
   }
 
   return (
-    <div className={'flex flex-col space-y-4'}>
+    <div
+      className={
+        'dark:bg-secondary flex flex-col space-y-4 rounded-lg border p-4'
+      }
+    >
       <p>
         <span className={'text-muted-foreground text-sm'}>
           <Trans i18nKey={'account:multiFactorModalHeading'} />
@@ -367,11 +368,7 @@ function FactorNameForm(
           props.onSetFactorName(data.name);
         })}
       >
-        <div
-          className={
-            'dark:bg-secondary flex flex-col space-y-4 rounded-lg border p-4'
-          }
-        >
+        <div className={'flex flex-col space-y-4'}>
           <FormField
             name={'name'}
             render={({ field }) => {
@@ -422,10 +419,10 @@ function QrImage({ src }: { src: string }) {
   );
 }
 
-function useEnrollFactor(props: { userId: string }) {
+function useEnrollFactor(userId: string) {
   const client = useSupabase();
   const queryClient = useQueryClient();
-  const mutationKey = useFactorsMutationKey(props.userId);
+  const mutationKey = useFactorsMutationKey(userId);
 
   const mutationFn = async (factorName: string) => {
     const response = await client.auth.mfa.enroll({
@@ -457,8 +454,8 @@ function useEnrollFactor(props: { userId: string }) {
   });
 }
 
-function useVerifyCodeMutation(props: { userId: string }) {
-  const mutationKey = useFactorsMutationKey(props.userId);
+function useVerifyCodeMutation(userId: string) {
+  const mutationKey = useFactorsMutationKey(userId);
   const client = useSupabase();
   const queryClient = useQueryClient();
 
