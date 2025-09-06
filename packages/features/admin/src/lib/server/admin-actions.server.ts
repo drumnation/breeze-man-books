@@ -28,10 +28,10 @@ export const banUserAction = async (params: {
   const service = getAdminAuthService(params.client);
   const userId = params.data.payload.userId;
 
-  await service.banUser(userId);
+  const { error } = await service.banUser(userId);
 
   return {
-    success: true,
+    success: !error,
   };
 };
 
@@ -47,11 +47,10 @@ export const reactivateUserAction = async ({
   client: SupabaseClient<Database>;
 }) => {
   const service = getAdminAuthService(client);
-
-  await service.reactivateUser(data.payload.userId);
+  const { error } = await service.reactivateUser(data.payload.userId);
 
   return {
-    success: true,
+    success: !error,
   };
 };
 
@@ -83,8 +82,11 @@ export const deleteUserAction = async ({
   client: SupabaseClient<Database>;
 }) => {
   const service = getAdminAuthService(client);
+  const { error } = await service.deleteUser(data.payload.userId);
 
-  await service.deleteUser(data.payload.userId);
+  if (error) {
+    throw new Error(`Cannot delete user: ${error.message}`);
+  }
 
   return redirect('/admin/accounts');
 };
@@ -98,7 +100,13 @@ export const deleteAccountAction = async ({
 }: z.infer<typeof DeleteAccountSchema>) => {
   const service = getAdminAccountsService();
 
-  await service.deleteAccount(payload.accountId);
+  const { error } = await service.deleteAccount(payload.accountId);
+
+  if (error) {
+    return {
+      success: false,
+    };
+  }
 
   return redirect('/admin/accounts');
 };

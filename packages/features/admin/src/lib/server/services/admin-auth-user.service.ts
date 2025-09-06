@@ -27,12 +27,7 @@ class AdminAuthUserService {
   async deleteUser(userId: string) {
     await this.assertUserIsNotCurrentSuperAdmin(userId);
 
-    const deleteUserResponse =
-      await this.adminClient.auth.admin.deleteUser(userId);
-
-    if (deleteUserResponse.error) {
-      throw new Error(`Error deleting user record or auth record.`);
-    }
+    return this.adminClient.auth.admin.deleteUser(userId);
   }
 
   /**
@@ -148,8 +143,8 @@ class AdminAuthUserService {
     }
   }
 
-  private async setBanDuration(userId: string, banDuration: string) {
-    await this.adminClient.auth.admin.updateUserById(userId, {
+  private setBanDuration(userId: string, banDuration: string) {
+    return this.adminClient.auth.admin.updateUserById(userId, {
       ban_duration: banDuration,
     });
   }

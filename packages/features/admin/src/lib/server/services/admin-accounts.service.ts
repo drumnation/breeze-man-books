@@ -10,13 +10,6 @@ class AdminAccountsService {
   constructor(private adminClient: SupabaseClient<Database>) {}
 
   async deleteAccount(accountId: string) {
-    const { error } = await this.adminClient
-      .from('accounts')
-      .delete()
-      .eq('id', accountId);
-
-    if (error) {
-      throw error;
-    }
+    return this.adminClient.from('accounts').delete().eq('id', accountId);
   }
 }

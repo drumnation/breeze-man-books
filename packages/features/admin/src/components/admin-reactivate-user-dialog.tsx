@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect } from 'react';
+
 import { useFetcher } from 'react-router';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -28,6 +30,7 @@ import {
   FormMessage,
 } from '@kit/ui/form';
 import { Input } from '@kit/ui/input';
+import { toast } from '@kit/ui/sonner';
 
 import { ReactivateUserSchema } from '../lib/server/schema/admin-actions.schema';
 
@@ -36,8 +39,29 @@ export function AdminReactivateUserDialog(
     userId: string;
   }>,
 ) {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>{props.children}</AlertDialogTrigger>
+
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Reactivate User</AlertDialogTitle>
+
+          <AlertDialogDescription>
+            Are you sure you want to reactivate this user?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+      </AlertDialogContent>
+
+      <AdminReactivateUserForm userId={props.userId} />
+    </AlertDialog>
+  );
+}
+
+function AdminReactivateUserForm(props: { userId: string }) {
   const fetcher = useFetcher();
   const csrfToken = useCsrfToken();
+  const isLoading = fetcher.state !== 'idle';
 
   const form = useForm({
     resolver: zodResolver(
@@ -56,72 +80,70 @@ export function AdminReactivateUserDialog(
     },
   });
 
+  useEffect(() => {
+    if (fetcher.data) {
+      if (fetcher.data?.success) {
+        toast.success('User reactivated successfully');
+      } else {
+        toast.error('Failed to reactivate user');
+      }
+    }
+  }, [fetcher.data]);
+
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>{props.children}</AlertDialogTrigger>
+    <Form {...form}>
+      <form
+        className={'flex flex-col space-y-8'}
+        onSubmit={form.handleSubmit((data) => {
+          return fetcher.submit(
+            {
+              intent: 'reactivate-user',
+              payload: {
+                ...data,
+                csrfToken,
+              },
+            } satisfies z.infer<typeof ReactivateUserSchema>,
+            {
+              method: 'POST',
+              encType: 'application/json',
+            },
+          );
+        })}
+      >
+        <FormField
+          name={'confirmation'}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                Type <b>CONFIRM</b> to confirm
+              </FormLabel>
 
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Reactivate User</AlertDialogTitle>
+              <FormControl>
+                <Input
+                  required
+                  pattern={'CONFIRM'}
+                  placeholder={'Type CONFIRM to confirm'}
+                  {...field}
+                />
+              </FormControl>
 
-          <AlertDialogDescription>
-            Are you sure you want to reactivate this user?
-          </AlertDialogDescription>
-        </AlertDialogHeader>
+              <FormDescription>
+                Are you sure you want to do this?
+              </FormDescription>
 
-        <Form {...form}>
-          <form
-            className={'flex flex-col space-y-8'}
-            onSubmit={form.handleSubmit((data) => {
-              return fetcher.submit(
-                {
-                  intent: 'reactivate-user',
-                  payload: {
-                    ...data,
-                    csrfToken,
-                  },
-                } satisfies z.infer<typeof ReactivateUserSchema>,
-                {
-                  method: 'POST',
-                  encType: 'application/json',
-                },
-              );
-            })}
-          >
-            <FormField
-              name={'confirmation'}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Type <b>CONFIRM</b> to confirm
-                  </FormLabel>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-                  <FormControl>
-                    <Input
-                      required
-                      pattern={'CONFIRM'}
-                      placeholder={'Type CONFIRM to confirm'}
-                      {...field}
-                    />
-                  </FormControl>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
 
-                  <FormDescription>
-                    Are you sure you want to do this?
-                  </FormDescription>
-
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-
-              <Button type={'submit'}>Reactivate User</Button>
-            </AlertDialogFooter>
-          </form>
-        </Form>
-      </AlertDialogContent>
-    </AlertDialog>
+          <Button type={'submit'}>
+            {isLoading ? 'Reactivating...' : 'Reactivate User'}
+          </Button>
+        </AlertDialogFooter>
+      </form>
+    </Form>
   );
 }

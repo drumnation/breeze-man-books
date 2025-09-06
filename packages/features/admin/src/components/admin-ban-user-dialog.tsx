@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect } from 'react';
+
 import { useFetcher } from 'react-router';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -28,6 +30,7 @@ import {
   FormMessage,
 } from '@kit/ui/form';
 import { Input } from '@kit/ui/input';
+import { toast } from '@kit/ui/sonner';
 
 import { BanUserSchema } from '../lib/server/schema/admin-actions.schema';
 
@@ -36,11 +39,32 @@ export function AdminBanUserDialog(
     userId: string;
   }>,
 ) {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>{props.children}</AlertDialogTrigger>
+
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Ban User</AlertDialogTitle>
+
+          <AlertDialogDescription>
+            Are you sure you want to ban this user?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+      </AlertDialogContent>
+
+      <AdminBanUserForm userId={props.userId} />
+    </AlertDialog>
+  );
+}
+
+function AdminBanUserForm(props: { userId: string }) {
   const fetcher = useFetcher<{
     success: boolean;
   }>();
 
   const csrfToken = useCsrfToken();
+  const isLoading = fetcher.state !== 'idle';
 
   const form = useForm({
     resolver: zodResolver(
@@ -59,71 +83,67 @@ export function AdminBanUserDialog(
     },
   });
 
+  useEffect(() => {
+    if (fetcher.data) {
+      if (fetcher.data?.success) {
+        toast.success('User banned successfully');
+      } else {
+        toast.error('Failed to ban user');
+      }
+    }
+  }, [fetcher.data]);
+
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>{props.children}</AlertDialogTrigger>
+    <Form {...form}>
+      <form
+        className={'flex flex-col space-y-8'}
+        onSubmit={form.handleSubmit((data) => {
+          return fetcher.submit(
+            {
+              intent: 'ban-user',
+              payload: { ...data, csrfToken },
+            } satisfies z.infer<typeof BanUserSchema>,
+            {
+              method: 'POST',
+              encType: 'application/json',
+            },
+          );
+        })}
+      >
+        <FormField
+          name={'confirmation'}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                Type <b>CONFIRM</b> to confirm
+              </FormLabel>
 
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Ban User</AlertDialogTitle>
+              <FormControl>
+                <Input
+                  required
+                  pattern={'CONFIRM'}
+                  placeholder={'Type CONFIRM to confirm'}
+                  {...field}
+                />
+              </FormControl>
 
-          <AlertDialogDescription>
-            Are you sure you want to ban this user?
-          </AlertDialogDescription>
-        </AlertDialogHeader>
+              <FormDescription>
+                Are you sure you want to do this?
+              </FormDescription>
 
-        <Form {...form}>
-          <form
-            className={'flex flex-col space-y-8'}
-            onSubmit={form.handleSubmit((data) => {
-              return fetcher.submit(
-                {
-                  intent: 'ban-user',
-                  payload: { ...data, csrfToken },
-                } satisfies z.infer<typeof BanUserSchema>,
-                {
-                  method: 'POST',
-                  encType: 'application/json',
-                },
-              );
-            })}
-          >
-            <FormField
-              name={'confirmation'}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Type <b>CONFIRM</b> to confirm
-                  </FormLabel>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-                  <FormControl>
-                    <Input
-                      required
-                      pattern={'CONFIRM'}
-                      placeholder={'Type CONFIRM to confirm'}
-                      {...field}
-                    />
-                  </FormControl>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
 
-                  <FormDescription>
-                    Are you sure you want to do this?
-                  </FormDescription>
-
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-
-              <Button type={'submit'} variant={'destructive'}>
-                Ban User
-              </Button>
-            </AlertDialogFooter>
-          </form>
-        </Form>
-      </AlertDialogContent>
-    </AlertDialog>
+          <Button type={'submit'} variant={'destructive'}>
+            {isLoading ? 'Banning...' : 'Ban User'}
+          </Button>
+        </AlertDialogFooter>
+      </form>
+    </Form>
   );
 }
