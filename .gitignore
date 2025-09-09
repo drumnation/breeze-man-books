@@ -45,3 +45,10 @@ yarn-error.log*
 vite.config.ts.timestamp-*
 
 .react-router/
+
+# cloudflare
+.wrangler
+
+# local env files
+.env*
+.dev.vars
