@@ -51,9 +51,9 @@ export function AdminReactivateUserDialog(
             Are you sure you want to reactivate this user?
           </AlertDialogDescription>
         </AlertDialogHeader>
-      </AlertDialogContent>
 
-      <AdminReactivateUserForm userId={props.userId} />
+        <AdminReactivateUserForm userId={props.userId} />
+      </AlertDialogContent>
     </AlertDialog>
   );
 }
