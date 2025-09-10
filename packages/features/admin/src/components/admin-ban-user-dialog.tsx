@@ -51,9 +51,9 @@ export function AdminBanUserDialog(
             Are you sure you want to ban this user?
           </AlertDialogDescription>
         </AlertDialogHeader>
-      </AlertDialogContent>
 
-      <AdminBanUserForm userId={props.userId} />
+        <AdminBanUserForm userId={props.userId} />
+      </AlertDialogContent>
     </AlertDialog>
   );
 }
