@@ -14,7 +14,7 @@ test.describe('Team Invitation with MFA Flow', () => {
     const teamAccounts = new TeamAccountsPageObject(page);
     const invitations = new InvitationsPageObject(page);
 
-    const teamName = `test-team-${Math.random().toString(36).substring(2, 15)}`;
+    const teamName = `test-team-${Math.random().toString(36).substring(2, 8)}`;
     const teamSlug = teamName.toLowerCase().replace(/ /g, '-');
 
     // Step 1: test@makerkit.dev creates a team and sends invitation
@@ -46,9 +46,11 @@ test.describe('Team Invitation with MFA Flow', () => {
 
     // Verify invitation was sent
     await expect(invitations.getInvitations()).toHaveCount(1);
+
     const invitationRow = invitations.getInvitationRow(
       'super-admin@makerkit.dev',
     );
+
     await expect(invitationRow).toBeVisible();
 
     // Sign out test@makerkit.dev
@@ -60,9 +62,7 @@ test.describe('Team Invitation with MFA Flow', () => {
 
     await auth.visitConfirmEmailLink('super-admin@makerkit.dev');
 
-    await page
-      .getByRole('link', { name: 'Already have an account?' })
-      .click();
+    await page.getByRole('link', { name: 'Already have an account?' }).click();
 
     await auth.signIn({
       email: 'super-admin@makerkit.dev',
@@ -81,10 +81,10 @@ test.describe('Team Invitation with MFA Flow', () => {
 
     // Step 3: Verify team invitation is visible and accept it
     // Accept the team invitation
-    await invitations.acceptInvitation();
-
-    // Should be redirected to the team dashboard
-    await page.waitForURL(`/home/${teamSlug}`);
+    await Promise.all([
+      invitations.acceptInvitation(),
+      page.waitForURL(`/home/${teamSlug}`),
+    ]);
 
     // Step 4: Verify membership was successful
     // Open account selector to verify team is available

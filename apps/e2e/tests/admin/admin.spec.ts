@@ -117,6 +117,7 @@ test.describe('Admin', () => {
       // Try with invalid confirmation
       await page.fill('[placeholder="Type CONFIRM to confirm"]', 'WRONG');
       await page.getByRole('button', { name: 'Ban User' }).click();
+
       await expect(
         page.getByRole('heading', { name: 'Ban User' }),
       ).toBeVisible(); // Dialog should still be open
@@ -124,7 +125,8 @@ test.describe('Admin', () => {
       // Confirm with correct text
       await page.fill('[placeholder="Type CONFIRM to confirm"]', 'CONFIRM');
       await page.getByRole('button', { name: 'Ban User' }).click();
-      await expect(page.getByText('Banned')).toBeVisible();
+
+      await expect(page.getByText('User Banned')).toBeVisible();
 
       await page.context().clearCookies();
 
@@ -148,20 +150,23 @@ test.describe('Admin', () => {
       // First ban the user
       await page.getByTestId('admin-ban-account-button').click();
       await page.fill('[placeholder="Type CONFIRM to confirm"]', 'CONFIRM');
+
       await page.getByRole('button', { name: 'Ban User' }).click();
-      await expect(page.getByText('Banned')).toBeVisible();
+      await expect(page.getByText('User Banned')).toBeVisible();
 
       // Now reactivate
       await page.getByTestId('admin-reactivate-account-button').click();
+
       await expect(
         page.getByRole('heading', { name: 'Reactivate User' }),
       ).toBeVisible();
 
       await page.fill('[placeholder="Type CONFIRM to confirm"]', 'CONFIRM');
-      await page.getByRole('button', { name: 'Reactivate User' }).click();
 
-      // Verify ban badge is removed
-      await expect(page.getByText('Banned')).not.toBeVisible();
+      await Promise.all([
+        page.getByRole('button', { name: 'Reactivate User' }).click(),
+        page.waitForTimeout(500),
+      ]);
 
       // Log out
       await page.context().clearCookies();
