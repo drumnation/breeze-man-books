@@ -16,9 +16,9 @@ import { AppBreadcrumbs } from '@kit/ui/app-breadcrumbs';
 import { If } from '@kit/ui/if';
 import { PageBody } from '@kit/ui/page';
 import { Trans } from '@kit/ui/trans';
-import { cn } from '@kit/ui/utils';
 
 import billingConfig from '~/config/billing.config';
+import { resolveProductPlan } from '~/lib/billing/.server/resolve-product-plan.server';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { requireUserLoader } from '~/lib/require-user-loader';
 import type { Route } from '~/types/app/routes/home/account/+types/billing';
@@ -57,6 +57,17 @@ export async function loader(args: Route.LoaderArgs) {
     accountId,
   });
 
+  const variantId = data ? data.items[0]!.variant_id : '';
+
+  const productPlan = variantId
+    ? await resolveProductPlan(
+        client,
+        billingConfig,
+        variantId,
+        data?.currency || 'USD',
+      )
+    : null;
+
   return {
     title,
     data,
@@ -64,11 +75,12 @@ export async function loader(args: Route.LoaderArgs) {
     accountId,
     workspace,
     accountSlug,
+    productPlan,
   };
 }
 
 export default function TeamAccountBillingPage(props: Route.ComponentProps) {
-  const { data, workspace, customerId, accountId, accountSlug } =
+  const { data, workspace, customerId, accountId, accountSlug, productPlan } =
     props.loaderData;
 
   const canManageBilling =
@@ -139,18 +151,15 @@ export default function TeamAccountBillingPage(props: Route.ComponentProps) {
       />
 
       <PageBody>
-        <div
-          className={cn(`flex w-full flex-col space-y-4`, {
-            'max-w-2xl': data,
-          })}
-        >
+        <div className={`flex w-full max-w-2xl flex-col space-y-4`}>
           <If condition={data} fallback={<div>{Checkout}</div>}>
             {(data) => {
               if ('active' in data) {
                 return (
                   <CurrentSubscriptionCard
                     subscription={data}
-                    config={billingConfig}
+                    product={productPlan!.product}
+                    plan={productPlan!.plan}
                   />
                 );
               }

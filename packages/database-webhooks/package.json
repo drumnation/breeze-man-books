@@ -20,9 +20,8 @@
     "@kit/shared": "workspace:*",
     "@kit/stripe": "workspace:*",
     "@kit/supabase": "workspace:*",
-    "@kit/team-accounts": "workspace:*",
     "@kit/tsconfig": "workspace:*",
-    "@supabase/supabase-js": "^2.55.0",
+    "@supabase/supabase-js": "^2.74.0",
     "zod": "^3.25.76"
   },
   "typesVersions": {

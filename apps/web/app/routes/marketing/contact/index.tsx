@@ -36,7 +36,7 @@ export default function ContactPage(props: Route.ComponentProps) {
 
       <div className={'container mx-auto'}>
         <div
-          className={'flex flex-1 flex-col items-center justify-center py-12'}
+          className={'flex flex-1 flex-col items-center justify-center py-8'}
         >
           <div
             className={

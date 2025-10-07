@@ -3,15 +3,15 @@ import { Link } from 'react-router';
 import { Cms } from '@kit/cms';
 import { If } from '@kit/ui/if';
 
-import { CoverImage } from '~/routes/marketing/blog/_components/cover-image';
-import { DateFormatter } from '~/routes/marketing/blog/_components/date-formatter';
+import { CoverImage } from './cover-image';
+import { DateFormatter } from './date-formatter';
 
 type Props = {
   post: Cms.ContentItem;
   imageHeight?: string | number;
 };
 
-const DEFAULT_IMAGE_HEIGHT = 250;
+const DEFAULT_IMAGE_HEIGHT = 220;
 
 export function PostPreview({
   post,
@@ -23,41 +23,40 @@ export function PostPreview({
   const slug = `/blog/${post.slug}`;
 
   return (
-    <div className="transition-shadow-sm flex flex-col gap-y-4 rounded-lg duration-500">
+    <Link
+      to={slug}
+      className="hover:bg-muted/50 active:bg-muted flex flex-col gap-y-2.5 rounded-md p-4 transition-all"
+    >
       <If condition={image}>
         {(imageUrl) => (
           <div className="relative mb-2 w-full" style={{ height }}>
-            <Link to={slug}>
-              <CoverImage
-                className={'absolute h-full w-full'}
-                title={title}
-                src={imageUrl}
-              />
-            </Link>
+            <CoverImage title={title} src={imageUrl} />
           </div>
         )}
       </If>
 
-      <div className={'flex flex-col space-y-4 px-1'}>
+      <div className={'flex flex-col space-y-2'}>
         <div className={'flex flex-col space-y-2'}>
-          <h2 className="text-xl font-semibold leading-snug tracking-tight">
-            <Link to={slug} className="hover:underline">
-              {title}
-            </Link>
-          </h2>
-
-          <div className="flex flex-row items-center gap-x-3 text-sm">
+          <div className="flex flex-row items-center gap-x-3 text-xs">
             <div className="text-muted-foreground">
               <DateFormatter dateString={publishedAt} />
             </div>
           </div>
+
+          <h2 className="text-lg font-medium leading-snug tracking-tight">
+            <span className="hover:underline">{title}</span>
+          </h2>
         </div>
 
         <p
           className="text-muted-foreground mb-4 text-sm leading-relaxed"
-          dangerouslySetInnerHTML={{ __html: description ?? '' }}
+          dangerouslySetInnerHTML={{ __html: trimText(description ?? '', 200) }}
         />
       </div>
-    </div>
+    </Link>
   );
+}
+
+function trimText(text: string, maxLength: number) {
+  return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
 }

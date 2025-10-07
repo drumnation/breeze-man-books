@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@lemonsqueezy/lemonsqueezy.js": "4.0.0",
-    "react-router": "^7.8.2"
+    "react-router": "^7.9.3"
   },
   "devDependencies": {
     "@kit/billing": "workspace:*",
@@ -26,8 +26,8 @@
     "@kit/tailwind-config": "workspace:*",
     "@kit/tsconfig": "workspace:*",
     "@kit/ui": "workspace:*",
-    "@types/react": "^19.1.11",
-    "react": "19.1.1",
+    "@types/react": "^19.2.2",
+    "react": "19.2.0",
     "zod": "^3.25.76"
   },
   "typesVersions": {

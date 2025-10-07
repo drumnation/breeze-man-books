@@ -7,9 +7,15 @@ const providers: z.ZodType<Provider> = getProviders();
 const AuthConfigSchema = z.object({
   captchaTokenSiteKey: z
     .string({
-      description: 'The reCAPTCHA site key.',
+      description: 'The CAPTCHA site key.',
     })
     .optional(),
+  enableIdentityLinking: z
+    .boolean({
+      description: 'Whether to enable identity linking.',
+    })
+    .optional()
+    .default(false),
   displayTermsCheckbox: z
     .boolean({
       description: 'Whether to display the terms checkbox during sign-up.',
@@ -34,6 +40,10 @@ const authConfig = AuthConfigSchema.parse({
   // whether to display the terms checkbox during sign-up
   displayTermsCheckbox:
     import.meta.env.VITE_DISPLAY_TERMS_AND_CONDITIONS_CHECKBOX === 'true',
+
+  // whether to enable identity linking:
+  // This needs to be enabled in the Supabase Console as well for it to work.
+  enableIdentityLinking: import.meta.env.VITE_AUTH_IDENTITY_LINKING === 'true',
 
   // NB: Enable the providers below in the Supabase Console
   // in your production project

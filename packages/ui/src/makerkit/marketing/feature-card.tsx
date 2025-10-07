@@ -22,18 +22,17 @@ export const FeatureCard = forwardRef<HTMLDivElement, FeatureCardProps>(
     return (
       <div
         ref={ref}
-        className={cn(
-          'dark:ring-primary/10 rounded-xl p-2 ring-2 ring-gray-100',
-          className,
-        )}
+        className={cn('bg-muted/50 rounded', className)}
         {...props}
       >
-        <CardHeader>
-          <CardTitle className="text-xl font-semibold">{label}</CardTitle>
+        <CardHeader className="py-4">
+          <CardTitle className="text-lg font-medium">{label}</CardTitle>
+
           <CardDescription className="text-muted-foreground max-w-xs text-sm tracking-tight">
             {description}
           </CardDescription>
         </CardHeader>
+
         <CardContent>
           {image}
           {children}

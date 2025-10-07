@@ -1,6 +1,6 @@
 {
   "name": "react-router-supabase-saas-kit-turbo",
-  "version": "1.0.0",
+  "version": "2.17.0",
   "private": true,
   "sideEffects": false,
   "engines": {
@@ -36,19 +36,19 @@
     "env:validate": "turbo gen validate-env"
   },
   "prettier": "@kit/prettier-config",
-  "packageManager": "pnpm@10.15.0",
+  "packageManager": "pnpm@10.18.1",
   "pnpm": {
     "overrides": {
       "react-is": "19.0.0"
     }
   },
   "devDependencies": {
-    "@manypkg/cli": "^0.25.0",
-    "@turbo/gen": "^2.5.4",
-    "@types/node": "^24.3.0",
-    "cross-env": "^10.0.0",
+    "@manypkg/cli": "^0.25.1",
+    "@turbo/gen": "^2.5.8",
+    "@types/node": "^24.7.0",
+    "cross-env": "^10.1.0",
     "prettier": "^3.6.2",
-    "turbo": "^2.5.4",
-    "typescript": "^5.9.2"
+    "turbo": "^2.5.8",
+    "typescript": "^5.9.3"
   }
 }

@@ -22,12 +22,10 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   }
 
   const searchParams = new URL(request.url).searchParams;
-  const inviteToken = searchParams.get('invite_token') ?? undefined;
   const returnPath = searchParams.get('next') ?? pathsConfig.app.home;
 
   return {
     title: i18n.t('auth:signIn'),
-    inviteToken,
     returnPath,
   };
 };
@@ -41,11 +39,7 @@ export const meta = ({ data }: Route.MetaArgs) => {
 };
 
 export default function SignInPage(props: Route.ComponentProps) {
-  const { inviteToken, returnPath } = props.loaderData;
-
-  const signUpPath =
-    pathsConfig.auth.signUp +
-    (inviteToken ? `?invite_token=${inviteToken}` : '');
+  const { returnPath } = props.loaderData;
 
   const paths = {
     callback: pathsConfig.auth.callback,
@@ -61,15 +55,11 @@ export default function SignInPage(props: Route.ComponentProps) {
         </Heading>
       </div>
 
-      <SignInMethodsContainer
-        inviteToken={inviteToken}
-        paths={paths}
-        providers={authConfig.providers}
-      />
+      <SignInMethodsContainer paths={paths} providers={authConfig.providers} />
 
       <div className={'flex justify-center'}>
         <Button asChild variant={'link'} size={'sm'}>
-          <Link to={signUpPath} prefetch={'render'}>
+          <Link to={pathsConfig.auth.signUp} prefetch={'render'}>
             <Trans i18nKey={'auth:doNotHaveAccountYet'} />
           </Link>
         </Button>

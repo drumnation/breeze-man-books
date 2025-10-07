@@ -18,21 +18,26 @@ test.describe('Invitations', () => {
     await invitations.openInviteForm();
 
     const email = invitations.auth.createRandomEmail();
+    const secondEmail = invitations.auth.createRandomEmail();
 
     const invites = [
       {
         email,
         role: 'member',
       },
+      {
+        email: secondEmail,
+        role: 'member',
+      },
     ];
 
     await invitations.inviteMembers(invites);
 
-    await expect(invitations.getInvitations()).toHaveCount(1);
+    await expect(invitations.getInvitations()).toHaveCount(2);
 
     await invitations.deleteInvitation(email);
 
-    await expect(invitations.getInvitations()).toHaveCount(0);
+    await expect(invitations.getInvitations()).toHaveCount(1);
   });
 
   test('users can update invites', async () => {
@@ -124,16 +129,6 @@ test.describe('Full Invitation Flow', () => {
     await page.reload();
 
     console.log(`Finding email to ${firstEmail} ...`);
-
-    await invitations.auth.visitConfirmEmailLink(firstEmail);
-
-    console.log(`Signing up with ${firstEmail} ...`);
-
-    await invitations.auth.signUp({
-      email: firstEmail,
-      password: 'password',
-      repeatPassword: 'password',
-    });
 
     await invitations.auth.visitConfirmEmailLink(firstEmail);
 

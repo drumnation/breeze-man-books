@@ -1,20 +1,28 @@
 import eslint from '@eslint/js';
-import turboConfig from 'eslint-config-turbo/flat';
+import turbo from 'eslint-config-turbo';
+import { defineConfig } from 'eslint/config';
 import tsEsLint from 'typescript-eslint';
 
-import reactConfig from './react.js';
+import reactConfig, {
+  plugins as reactPlugins,
+  pluginsExtends as reactPluginsExtends,
+} from './react.js';
 
-export default tsEsLint.config(
+export default defineConfig(
   eslint.configs.recommended,
   tsEsLint.configs.recommended,
-  turboConfig,
   ...reactConfig,
   {
+    plugins: {
+      ...reactPlugins,
+      turbo,
+    },
     settings: {
       react: {
         version: '19.0',
       },
     },
+    extends: [...reactPluginsExtends],
   },
   {
     rules: {

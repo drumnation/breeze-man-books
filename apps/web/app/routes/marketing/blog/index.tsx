@@ -88,7 +88,7 @@ export default function BlogPage(props: Route.ComponentProps) {
     <>
       <SitePageHeader title={title} subtitle={description} />
 
-      <div className={'container flex flex-col space-y-6 py-12'}>
+      <div className={'container flex flex-col space-y-6 py-8'}>
         <If
           condition={posts.length > 0}
           fallback={<Trans i18nKey="marketing:noPosts" />}
@@ -114,7 +114,7 @@ export default function BlogPage(props: Route.ComponentProps) {
 
 function PostsGridList({ children }: React.PropsWithChildren) {
   return (
-    <div className="grid grid-cols-1 gap-y-8 md:grid-cols-2 md:gap-x-8 md:gap-y-12 lg:grid-cols-3 lg:gap-x-12">
+    <div className="grid grid-cols-1 gap-y-8 md:grid-cols-2 md:gap-x-2 md:gap-y-12 lg:grid-cols-3">
       {children}
     </div>
   );

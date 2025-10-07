@@ -2,9 +2,9 @@ import * as React from 'react';
 
 import { Link, useLocation } from 'react-router';
 
-import { Slot } from '@radix-ui/react-slot';
 import { VariantProps, cva } from 'class-variance-authority';
 import { ChevronDown, PanelLeft } from 'lucide-react';
+import { Slot } from 'radix-ui';
 import { useTranslation } from 'react-i18next';
 
 import { useIsMobile } from '../hooks/use-mobile';
@@ -452,7 +452,7 @@ SidebarGroup.displayName = 'SidebarGroup';
 const SidebarGroupLabel: React.FC<
   React.ComponentProps<'div'> & { asChild?: boolean }
 > = ({ className, asChild = false, ...props }) => {
-  const Comp = asChild ? Slot : 'div';
+  const Comp = asChild ? Slot.Root : 'div';
 
   return (
     <Comp
@@ -471,7 +471,7 @@ SidebarGroupLabel.displayName = 'SidebarGroupLabel';
 const SidebarGroupAction: React.FC<
   React.ComponentProps<'button'> & { asChild?: boolean }
 > = ({ className, asChild = false, ...props }) => {
-  const Comp = asChild ? Slot : 'button';
+  const Comp = asChild ? Slot.Root : 'button';
 
   return (
     <Comp
@@ -568,7 +568,7 @@ const SidebarMenuButton: React.FC<
   className,
   ...props
 }) => {
-  const Comp = asChild ? Slot : 'button';
+  const Comp = asChild ? Slot.Root : 'button';
   const { isMobile, open } = useSidebar();
   const { t } = useTranslation();
 
@@ -615,7 +615,7 @@ const SidebarMenuAction: React.FC<
     showOnHover?: boolean;
   }
 > = ({ className, asChild = false, showOnHover = false, ...props }) => {
-  const Comp = asChild ? Slot : 'button';
+  const Comp = asChild ? Slot.Root : 'button';
 
   return (
     <Comp
@@ -723,7 +723,7 @@ const SidebarMenuSubButton: React.FC<
     isActive?: boolean;
   }
 > = ({ asChild = false, size = 'md', isActive, className, ...props }) => {
-  const Comp = asChild ? Slot : 'a';
+  const Comp = asChild ? Slot.Root : 'a';
 
   return (
     <Comp

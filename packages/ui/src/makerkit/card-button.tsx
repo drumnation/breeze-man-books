@@ -1,75 +1,70 @@
 import * as React from 'react';
 
-import { Slot, Slottable } from '@radix-ui/react-slot';
 import { ChevronRight } from 'lucide-react';
+import { Slot } from 'radix-ui';
 
 import { cn } from '../lib/utils';
 
-export const CardButton = React.forwardRef<
-  HTMLButtonElement,
+export const CardButton: React.FC<
   {
     asChild?: boolean;
     className?: string;
     children: React.ReactNode;
   } & React.ButtonHTMLAttributes<HTMLButtonElement>
->(function CardButton({ className, asChild, ...props }, ref) {
-  const Comp = asChild ? Slot : 'button';
+> = function CardButton({ className, asChild, ...props }) {
+  const Comp = asChild ? Slot.Root : 'button';
 
   return (
     <Comp
-      ref={ref}
       className={cn(
-        'group hover:bg-secondary/20 active:bg-secondary active:bg-secondary/50 dark:shadow-primary/20 relative flex h-36 flex-col rounded-lg border transition-all hover:shadow active:shadow-lg',
+        'group hover:bg-secondary/20 active:bg-secondary active:bg-secondary/50 dark:shadow-primary/20 relative flex h-36 flex-col rounded-lg border transition-all hover:shadow-xs active:shadow-lg',
         className,
       )}
       {...props}
     >
-      <Slottable>{props.children}</Slottable>
+      <Slot.Slottable>{props.children}</Slot.Slottable>
     </Comp>
   );
-});
+};
 
-export const CardButtonTitle = React.forwardRef<
-  HTMLDivElement,
+export const CardButtonTitle: React.FC<
   {
-    className?: string;
     asChild?: boolean;
     children: React.ReactNode;
-  }
->(function CardButtonTitle({ className, asChild, ...props }, ref) {
-  const Comp = asChild ? Slot : 'div';
+  } & React.HTMLAttributes<HTMLDivElement>
+> = function CardButtonTitle({ className, asChild, ...props }) {
+  const Comp = asChild ? Slot.Root : 'div';
 
   return (
     <Comp
-      ref={ref}
       className={cn(
         className,
         'text-muted-foreground group-hover:text-secondary-foreground align-super text-sm font-medium transition-colors',
       )}
       {...props}
     >
-      <Slottable>{props.children}</Slottable>
+      <Slot.Slottable>{props.children}</Slot.Slottable>
     </Comp>
   );
-});
+};
 
-export const CardButtonHeader = React.forwardRef<
-  HTMLDivElement,
+export const CardButtonHeader: React.FC<
   {
-    className?: string;
     children: React.ReactNode;
     asChild?: boolean;
     displayArrow?: boolean;
-  }
->(function CardButtonHeader(
-  { className, asChild, displayArrow = true, ...props },
-  ref,
-) {
-  const Comp = asChild ? Slot : 'div';
+  } & React.HTMLAttributes<HTMLDivElement>
+> = function CardButtonHeader({
+  className,
+  asChild,
+  displayArrow = true,
+  ...props
+}) {
+  const Comp = asChild ? Slot.Root : 'div';
 
   return (
-    <Comp className={cn(className, 'p-4')} {...props} ref={ref}>
-      <Slottable>
+    <Comp className={cn(className, 'p-4')} {...props}>
+      <Slot.Slottable>
         {props.children}
 
         <ChevronRight
@@ -80,41 +75,33 @@ export const CardButtonHeader = React.forwardRef<
             },
           )}
         />
-      </Slottable>
+      </Slot.Slottable>
     </Comp>
   );
-});
+};
 
-export const CardButtonContent = React.forwardRef<
-  HTMLDivElement,
+export const CardButtonContent: React.FC<
   {
-    className?: string;
     asChild?: boolean;
     children: React.ReactNode;
-  }
->(function CardButtonContent({ className, asChild, ...props }, ref) {
-  const Comp = asChild ? Slot : 'div';
+  } & React.HTMLAttributes<HTMLDivElement>
+> = function CardButtonContent({ className, asChild, ...props }) {
+  const Comp = asChild ? Slot.Root : 'div';
 
   return (
-    <Comp
-      className={cn(className, 'flex flex-1 flex-col px-4')}
-      {...props}
-      ref={ref}
-    >
-      <Slottable>{props.children}</Slottable>
+    <Comp className={cn(className, 'flex flex-1 flex-col px-4')} {...props}>
+      <Slot.Slottable>{props.children}</Slot.Slottable>
     </Comp>
   );
-});
+};
 
-export const CardButtonFooter = React.forwardRef<
-  HTMLDivElement,
+export const CardButtonFooter: React.FC<
   {
-    className?: string;
     asChild?: boolean;
     children: React.ReactNode;
-  }
->(function CardButtonFooter({ className, asChild, ...props }, ref) {
-  const Comp = asChild ? Slot : 'div';
+  } & React.HTMLAttributes<HTMLDivElement>
+> = function CardButtonFooter({ className, asChild, ...props }) {
+  const Comp = asChild ? Slot.Root : 'div';
 
   return (
     <Comp
@@ -123,9 +110,8 @@ export const CardButtonFooter = React.forwardRef<
         'mt-auto flex h-0 w-full flex-col justify-center border-t px-4',
       )}
       {...props}
-      ref={ref}
     >
-      <Slottable>{props.children}</Slottable>
+      <Slot.Slottable>{props.children}</Slot.Slottable>
     </Comp>
   );
-});
+};

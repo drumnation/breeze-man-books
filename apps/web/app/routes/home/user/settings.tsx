@@ -18,6 +18,7 @@ import { HomeLayoutPageHeader } from './_components/home-page-header';
 const features = {
   enableAccountDeletion: featureFlagsConfig.enableAccountDeletion,
   enablePasswordUpdate: authConfig.providers.password,
+  enableAccountLinking: authConfig.enableIdentityLinking,
 };
 
 const paths = {
@@ -65,6 +66,7 @@ export default function PersonalAccountSettingsPage(
             userId={userId}
             features={features}
             paths={paths}
+            providers={authConfig.providers.oAuth}
           />
         </div>
       </PageBody>

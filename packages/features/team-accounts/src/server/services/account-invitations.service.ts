@@ -1,10 +1,14 @@
-import { SupabaseClient } from '@supabase/supabase-js';
+import { redirect } from 'react-router';
+
+import { JwtPayload, SupabaseClient } from '@supabase/supabase-js';
 
 import { addDays, formatISO } from 'date-fns';
 import { z } from 'zod';
 
 import { getLogger } from '@kit/shared/logger';
 import { Database } from '@kit/supabase/database';
+import { requireUser } from '@kit/supabase/require-user';
+import { getSupabaseServerAdminClient } from '@kit/supabase/server-admin-client';
 
 import {
   DeleteInvitationSchema,
@@ -12,6 +16,9 @@ import {
   InviteMembersSchema,
 } from '../../schema';
 import type { UpdateInvitationSchema } from '../../schema';
+import { createInvitationContextBuilder } from '../policies/invitation-context-builder';
+import { createInvitationsPolicyEvaluator } from '../policies/invitation-policies';
+import { createAccountInvitationsDispatchService } from './account-invitations-dispatcher.service';
 
 export function createAccountInvitationsService(
   client: SupabaseClient<Database>,
@@ -127,6 +134,33 @@ class AccountInvitationsService {
       name: this.namespace,
     };
 
+    const user = await requireUser(this.client);
+
+    if (user.error) {
+      logger.error(ctx, 'User not found');
+
+      return redirect(user.redirectTo);
+    }
+
+    // Evaluate invitation policies
+    const policiesResult = await this.evaluateInvitationsPolicies(
+      { invitations, accountSlug, csrfToken: '' },
+      user.data,
+    );
+
+    // If the invitations are not allowed, throw an error
+    if (!policiesResult.allowed) {
+      logger.info(
+        { reasons: policiesResult?.reasons, userId: user.data.id },
+        'Invitations blocked by policies',
+      );
+
+      return {
+        success: false,
+        reasons: policiesResult?.reasons,
+      };
+    }
+
     logger.info(ctx, 'Storing invitations...');
 
     const accountResponse = await this.client
@@ -196,6 +230,8 @@ class AccountInvitationsService {
       },
       'Invitations added to account',
     );
+
+    await this.dispatchInvitationEmails(ctx, responseInvitations);
 
     return {
       success: true,
@@ -311,6 +347,156 @@ class AccountInvitationsService {
 
     if (isUserAlreadyMember) {
       throw new Error('User already member of the team');
+    }
+  }
+
+  /**
+   * @name evaluateInvitationsPolicies
+   * @description Evaluates invitation policies with performance optimization.
+   * @param params - The invitations to evaluate (emails and roles).
+   */
+  async evaluateInvitationsPolicies(
+    params: z.infer<typeof InviteMembersSchema>['payload'],
+    user: JwtPayload,
+  ) {
+    const evaluator = createInvitationsPolicyEvaluator();
+    const hasPolicies = await evaluator.hasPoliciesForStage('submission');
+
+    // No policies to evaluate, skip
+    if (!hasPolicies) {
+      return {
+        allowed: true,
+        reasons: [],
+      };
+    }
+
+    const builder = createInvitationContextBuilder(this.client);
+    const context = await builder.buildContext(params, user);
+
+    return evaluator.canInvite(context, 'submission');
+  }
+
+  /**
+   * @name dispatchInvitationEmails
+   * @description Dispatches invitation emails to the invited users.
+   * @param ctx
+   * @param invitations
+   * @returns
+   */
+  private async dispatchInvitationEmails(
+    ctx: { accountSlug: string; name: string },
+    invitations: Database['public']['Tables']['invitations']['Row'][],
+  ) {
+    if (!invitations.length) {
+      return;
+    }
+
+    const logger = await getLogger();
+    const adminClient = getSupabaseServerAdminClient();
+    const service = createAccountInvitationsDispatchService(this.client);
+
+    const results = await Promise.allSettled(
+      invitations.map(async (invitation) => {
+        const joinTeamLink = service.getInvitationLink(invitation.invite_token);
+        const authCallbackUrl = service.getAuthCallbackUrl(joinTeamLink);
+
+        const getEmailLinkType = async () => {
+          const user = await adminClient
+            .from('accounts')
+            .select('*')
+            .eq('email', invitation.email)
+            .single();
+
+          // if the user is not found, return the invite type
+          // this link allows the user to register to the platform
+          if (user.error || !user.data) {
+            return 'invite';
+          }
+
+          // if the user is found, return the email link type to sign in
+          return 'magiclink';
+        };
+
+        const emailLinkType = await getEmailLinkType();
+
+        // generate an invitation link with Supabase admin client
+        // use the "redirectTo" parameter to redirect the user to the invitation page after the link is clicked
+        const generateLinkResponse = await adminClient.auth.admin.generateLink({
+          email: invitation.email,
+          type: emailLinkType,
+        });
+
+        // if the link generation fails, throw an error
+        if (generateLinkResponse.error) {
+          logger.error(
+            {
+              ...ctx,
+              error: generateLinkResponse.error,
+            },
+            'Failed to generate link',
+          );
+
+          throw generateLinkResponse.error;
+        }
+
+        // get the link from the response
+        const verifyLink = generateLinkResponse.data.properties?.action_link;
+
+        // extract token
+        const token = new URL(verifyLink).searchParams.get('token');
+
+        if (!token) {
+          // return error
+          throw new Error(
+            'Token in verify link from Supabase Auth was not found',
+          );
+        }
+
+        // add search params to be consumed by /auth/confirm route
+        authCallbackUrl.searchParams.set('token_hash', token);
+        authCallbackUrl.searchParams.set('type', emailLinkType);
+
+        const link = authCallbackUrl.href;
+
+        // send the invitation email
+        const data = await service.sendInvitationEmail({
+          invitation,
+          link,
+        });
+
+        // return the result
+        return {
+          id: invitation.id,
+          data,
+        };
+      }),
+    );
+
+    for (const result of results) {
+      if (result.status !== 'fulfilled' || !result.value.data.success) {
+        logger.error(
+          {
+            ...ctx,
+            invitationId:
+              result.status === 'fulfilled' ? result.value.id : result.reason,
+          },
+          'Failed to send invitation email',
+        );
+      }
+    }
+
+    const succeeded = results.filter(
+      (result) => result.status === 'fulfilled' && result.value.data.success,
+    );
+
+    if (succeeded.length) {
+      logger.info(
+        {
+          ...ctx,
+          count: succeeded.length,
+        },
+        'Invitation emails successfully sent!',
+      );
     }
   }
 }

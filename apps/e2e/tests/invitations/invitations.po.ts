@@ -53,20 +53,24 @@ export class InvitationsPageObject {
       }
     }
 
-    await form.locator('button[type="submit"]').click();
-    await this.page.waitForTimeout(500);
+    await Promise.all([
+      form.locator('button[type="submit"]').click(),
+      this.page.waitForResponse((response) => {
+        return response.request().method() === 'POST';
+      }),
+    ]);
   }
 
   navigateToMembers() {
     return expect(async () => {
       await this.page
-          .locator('a', {
-            hasText: 'Members',
-          })
-          .click();
+        .locator('a', {
+          hasText: 'Members',
+        })
+        .click();
 
       await this.page.waitForURL('**/home/*/members');
-    }).toPass()
+    }).toPass();
   }
 
   async openInviteForm() {
@@ -88,9 +92,16 @@ export class InvitationsPageObject {
 
     await this.page.locator('[data-test="remove-invitation-trigger"]').click();
 
-    await this.page.click(
+    const deleteButton = this.page.locator(
       '[data-test="delete-invitation-form"] button[type="submit"]',
     );
+
+    await expect(deleteButton).toBeVisible();
+
+    await Promise.all([
+      deleteButton.click(),
+      expect(deleteButton).not.toBeVisible(),
+    ]);
   }
 
   getInvitationRow(email: string) {
@@ -108,9 +119,12 @@ export class InvitationsPageObject {
     await this.page.click(`[data-test="role-selector-trigger"]`);
     await this.page.click(`[data-test="role-option-${role}"]`);
 
-    await this.page.click(
-      '[data-test="update-invitation-form"] button[type="submit"]',
-    );
+    await Promise.all([
+      this.page.click(
+        '[data-test="update-invitation-form"] button[type="submit"]',
+      ),
+      this.page.waitForLoadState('networkidle'),
+    ]);
   }
 
   async acceptInvitation() {

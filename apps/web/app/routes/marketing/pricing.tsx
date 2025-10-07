@@ -32,7 +32,7 @@ export default function PricingPage(props: Route.ComponentProps) {
   const data = props.loaderData;
 
   return (
-    <div className={'flex flex-col space-y-12'}>
+    <div className={'flex flex-col space-y-8'}>
       <SitePageHeader title={data.title} subtitle={data.subtitle} />
 
       <div className={'container mx-auto pb-8 xl:pb-16'}>

@@ -49,7 +49,7 @@ jobs:
 
   test:
     name: ⚫️ Test
-    timeout-minutes: 15
+    timeout-minutes: 20
     if: ${{ vars.ENABLE_E2E_JOB == 'true' }}
     runs-on: ubuntu-latest
     env:
@@ -125,6 +125,8 @@ jobs:
           docker run --add-host=host.docker.internal:host-gateway --rm -it --name=stripe -d stripe/stripe-cli:latest listen --forward-to http://host.docker.internal:5173/api/billing/webhook --skip-verify --api-key "$STRIPE_SECRET_KEY" --log-level debug &
 
       - name: Build
+        env:
+          NODE_OPTIONS: '--max-old-space-size=4096'
         run: pnpm --filter web build
 
       - name: Start Server

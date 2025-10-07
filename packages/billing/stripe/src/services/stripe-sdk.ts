@@ -2,7 +2,7 @@ import process from 'node:process';
 
 import { StripeServerEnvSchema } from '../schema/stripe-server-env.schema';
 
-const STRIPE_API_VERSION = '2025-07-30.basil';
+const STRIPE_API_VERSION = '2025-09-30.clover';
 
 /**
  * @description returns a Stripe instance

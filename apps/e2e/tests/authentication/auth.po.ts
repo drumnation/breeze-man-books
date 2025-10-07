@@ -50,7 +50,7 @@ export class AuthPageObject {
   async submitMFAVerification(key: string) {
     const period = 30;
 
-    const { otp } = TOTP.generate(key, {
+    const { otp } = await TOTP.generate(key, {
       period,
     });
 
@@ -105,6 +105,7 @@ export class AuthPageObject {
   }
 
   async updatePassword(password: string) {
+    await this.page.waitForTimeout(100);
     await this.page.fill('[name="password"]', password);
     await this.page.waitForTimeout(100);
     await this.page.fill('[name="repeatPassword"]', password);

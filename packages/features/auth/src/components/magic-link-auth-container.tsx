@@ -27,12 +27,10 @@ import { useCaptchaToken } from '../captcha/client';
 import { TermsAndConditionsFormField } from './terms-and-conditions-form-field';
 
 export function MagicLinkAuthContainer({
-  inviteToken,
   displayTermsCheckbox,
   redirectUrl,
   shouldCreateUser,
 }: {
-  inviteToken?: string;
   displayTermsCheckbox?: boolean;
   shouldCreateUser: boolean;
   redirectUrl: string;
@@ -55,10 +53,6 @@ export function MagicLinkAuthContainer({
 
   const onSubmit = ({ email }: { email: string }) => {
     const url = new URL(redirectUrl);
-
-    if (inviteToken) {
-      url.searchParams.set('invite_token', inviteToken);
-    }
 
     const emailRedirectTo = url.href;
 

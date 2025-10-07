@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useFetcher } from 'react-router';
 
@@ -22,36 +22,6 @@ export const DeleteInvitationDialog: React.FC<{
   setIsOpen: (isOpen: boolean) => void;
   invitationId: number;
 }> = ({ isOpen, setIsOpen, invitationId }) => {
-  const [error, setError] = useState<boolean>();
-  const csrfToken = useCsrfToken();
-
-  const fetcher = useFetcher<{
-    success: boolean;
-  }>();
-
-  useEffect(() => {
-    if (fetcher.data?.success) {
-      setIsOpen(false);
-    }
-
-    if (fetcher.data && !fetcher.data.success) {
-      setError(true);
-    }
-  }, [fetcher.data, setIsOpen]);
-
-  const onInvitationRemoved = useCallback(() => {
-    return fetcher.submit(
-      {
-        intent: 'delete-invitation',
-        payload: { invitationId, csrfToken },
-      },
-      {
-        method: 'POST',
-        encType: 'application/json',
-      },
-    );
-  }, [fetcher, invitationId, csrfToken]);
-
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogContent>
@@ -66,9 +36,8 @@ export const DeleteInvitationDialog: React.FC<{
         </AlertDialogHeader>
 
         <DeleteInvitationForm
-          pending={fetcher.state === 'submitting'}
-          error={error}
-          onInvitationRemoved={onInvitationRemoved}
+          invitationId={invitationId}
+          setIsOpen={setIsOpen}
         />
       </AlertDialogContent>
     </AlertDialog>
@@ -76,16 +45,49 @@ export const DeleteInvitationDialog: React.FC<{
 };
 
 function DeleteInvitationForm({
-  onInvitationRemoved,
-  pending,
-  error,
+  invitationId,
+  setIsOpen,
 }: {
-  pending: boolean;
-  onInvitationRemoved: () => void;
-  error: boolean | undefined;
+  invitationId: number;
+  setIsOpen: (isOpen: boolean) => void;
 }) {
+  const [error, setError] = useState<boolean>();
+  const csrfToken = useCsrfToken();
+
+  const fetcher = useFetcher<{
+    success: boolean;
+  }>();
+
+  const pending = fetcher.state !== 'idle';
+
+  useEffect(() => {
+    if (fetcher.data) {
+      if (fetcher.data.success) {
+        setIsOpen(false);
+      } else {
+        setError(true);
+      }
+    }
+  }, [fetcher.data, setIsOpen]);
+
   return (
-    <form data-test={'delete-invitation-form'} onSubmit={onInvitationRemoved}>
+    <form
+      data-test={'delete-invitation-form'}
+      onSubmit={(e) => {
+        e.preventDefault();
+
+        fetcher.submit(
+          {
+            intent: 'delete-invitation',
+            payload: { invitationId, csrfToken },
+          },
+          {
+            method: 'POST',
+            encType: 'application/json',
+          },
+        );
+      }}
+    >
       <div className={'flex flex-col space-y-6'}>
         <p className={'text-muted-foreground text-sm'}>
           <Trans i18nKey={'common:modalConfirmationQuestion'} />

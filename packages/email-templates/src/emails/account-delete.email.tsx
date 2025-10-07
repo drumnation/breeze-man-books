@@ -18,7 +18,6 @@ import { initializeEmailI18n } from '../lib/i18n';
 
 interface Props {
   productName: string;
-  userDisplayName: string;
   language?: string;
 }
 
@@ -55,9 +54,7 @@ export async function renderAccountDeleteEmail(props: Props) {
 
             <EmailContent>
               <Text className="text-[14px] leading-[24px] text-black">
-                {t(`${namespace}:hello`, {
-                  displayName: props.userDisplayName,
-                })}
+                {t(`${namespace}:hello`)}
               </Text>
 
               <Text className="text-[14px] leading-[24px] text-black">

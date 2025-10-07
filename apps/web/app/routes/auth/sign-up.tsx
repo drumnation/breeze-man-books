@@ -14,10 +14,6 @@ import type { Route } from '~/types/app/routes/auth/+types/sign-up';
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
   const i18n = await createI18nServerInstance(request);
-
-  const inviteToken =
-    new URL(request.url).searchParams.get('invite_token') ?? '';
-
   const user = await requireUser(getSupabaseServerClient(request));
 
   if (user.data) {
@@ -26,7 +22,6 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 
   return {
     title: i18n.t('auth:signUp'),
-    inviteToken,
   };
 };
 
@@ -43,13 +38,7 @@ const paths = {
   appHome: pathsConfig.app.home,
 };
 
-export default function SignUpPage(props: Route.ComponentProps) {
-  const { inviteToken } = props.loaderData;
-
-  const signInPath =
-    pathsConfig.auth.signIn +
-    (inviteToken ? `?invite_token=${inviteToken}` : '');
-
+export default function SignUpPage() {
   return (
     <>
       <div className={'flex justify-center'}>
@@ -61,13 +50,12 @@ export default function SignUpPage(props: Route.ComponentProps) {
       <SignUpMethodsContainer
         providers={authConfig.providers}
         displayTermsCheckbox={authConfig.displayTermsCheckbox}
-        inviteToken={inviteToken}
         paths={paths}
       />
 
       <div className={'flex justify-center'}>
         <Button asChild variant={'link'} size={'sm'}>
-          <Link to={signInPath} prefetch={'render'}>
+          <Link to={pathsConfig.auth.signIn} prefetch={'render'}>
             <Trans i18nKey={'auth:alreadyHaveAnAccount'} />
           </Link>
         </Button>

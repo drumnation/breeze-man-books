@@ -12,8 +12,6 @@ import { OauthProviders } from './oauth-providers';
 import { PasswordSignInContainer } from './password-sign-in-container';
 
 export function SignInMethodsContainer(props: {
-  inviteToken?: string;
-
   paths: {
     callback: string;
     returnPath: string;
@@ -33,19 +31,7 @@ export function SignInMethodsContainer(props: {
     : '';
 
   const onSignIn = () => {
-    // if the user has an invite token, we should join the team
-    if (props.inviteToken) {
-      const searchParams = new URLSearchParams({
-        invite_token: props.inviteToken,
-      });
-
-      const joinTeamPath = props.paths.joinTeam + '?' + searchParams.toString();
-
-      return navigate(joinTeamPath, { replace: true });
-    } else {
-      // otherwise, we should redirect to the return path
-      return navigate(props.paths.returnPath, { replace: true });
-    }
+    return navigate(props.paths.returnPath, { replace: true });
   };
 
   return (
@@ -57,7 +43,6 @@ export function SignInMethodsContainer(props: {
       <If condition={props.providers.magicLink}>
         <MagicLinkAuthContainer
           shouldCreateUser={false}
-          inviteToken={props.inviteToken}
           redirectUrl={redirectUrl}
         />
       </If>
@@ -77,7 +62,6 @@ export function SignInMethodsContainer(props: {
 
         <OauthProviders
           enabledProviders={props.providers.oAuth}
-          inviteToken={props.inviteToken}
           shouldCreateUser={false}
           paths={props.paths}
         />

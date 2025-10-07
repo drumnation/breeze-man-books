@@ -116,7 +116,9 @@ export function DocsNavigation({
     <>
       <Sidebar
         variant={'ghost'}
-        className={'z-1 sticky mt-4 max-h-full overflow-y-auto'}
+        className={
+          'z-1 sticky mt-4 max-h-full overflow-y-auto border-r-transparent'
+        }
       >
         <SidebarGroup>
           <SidebarGroupContent>

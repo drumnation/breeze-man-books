@@ -9,13 +9,11 @@ type Props = {
 export function CoverImage({ title, src, className }: Props) {
   return (
     <img
-      className={cn(
-        'duration-250 block rounded-xl object-cover' +
-          ' transition-all hover:opacity-90',
+      className={cn('block size-full rounded-md object-cover', {
         className,
-      )}
+      })}
       src={src}
-      alt={`Cover for ${title}`}
+      alt={`Cover Image for ${title}`}
     />
   );
 }

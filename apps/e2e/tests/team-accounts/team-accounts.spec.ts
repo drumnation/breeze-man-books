@@ -37,14 +37,6 @@ async function setupTeamWithMember(page: Page, memberRole = 'member') {
   // Sign up with the new member email and accept the invitation
   await invitations.auth.visitConfirmEmailLink(memberEmail);
 
-  await invitations.auth.signUp({
-    email: memberEmail,
-    password: 'password',
-    repeatPassword: 'password',
-  });
-
-  await invitations.auth.visitConfirmEmailLink(memberEmail);
-
   await invitations.acceptInvitation();
 
   await invitations.teamAccounts.openAccountsSelector();
@@ -98,8 +90,8 @@ test.describe('Team Accounts', () => {
   });
 
   test('cannot create a Team account using reserved names', async ({
-                                                                     page,
-                                                                   }) => {
+    page,
+  }) => {
     const teamAccounts = new TeamAccountsPageObject(page);
     await teamAccounts.setup();
 
@@ -132,16 +124,16 @@ test.describe('Team Accounts', () => {
     await teamAccounts.tryCreateTeam('Test,Name');
     await expectError();
 
-    await teamAccounts.tryCreateTeam('Test Name/')
+    await teamAccounts.tryCreateTeam('Test Name/');
     await expectError();
 
-    await teamAccounts.tryCreateTeam('Test Name\\')
+    await teamAccounts.tryCreateTeam('Test Name\\');
     await expectError();
 
-    await teamAccounts.tryCreateTeam('Test Name:')
+    await teamAccounts.tryCreateTeam('Test Name:');
     await expectError();
 
-    await teamAccounts.tryCreateTeam('Test Name;')
+    await teamAccounts.tryCreateTeam('Test Name;');
     await expectError();
 
     await teamAccounts.tryCreateTeam('Test Name=');

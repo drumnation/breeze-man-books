@@ -65,6 +65,7 @@ const teamAccountLayout = layout('routes/home/account/layout.tsx', [
   route('home/:account', 'routes/home/account/index.tsx'),
   route('home/:account/settings', 'routes/home/account/settings.tsx'),
   route('home/:account/members', 'routes/home/account/members.tsx'),
+  route('home/:account/members/policies', 'routes/home/account/policies.ts'),
   route('home/:account/billing', 'routes/home/account/billing.tsx'),
   route(
     'home/:account/billing/return',

@@ -15,10 +15,10 @@
     "./components": "./src/components/index.ts"
   },
   "dependencies": {
-    "@stripe/react-stripe-js": "^3.9.2",
-    "@stripe/stripe-js": "^7.9.0",
-    "react-router": "^7.8.2",
-    "stripe": "^18.4.0"
+    "@stripe/react-stripe-js": "^5.0.0",
+    "@stripe/stripe-js": "^8.0.0",
+    "react-router": "^7.9.3",
+    "stripe": "^19.1.0"
   },
   "devDependencies": {
     "@kit/billing": "workspace:*",
@@ -29,9 +29,9 @@
     "@kit/tailwind-config": "workspace:*",
     "@kit/tsconfig": "workspace:*",
     "@kit/ui": "workspace:*",
-    "@types/react": "^19.1.11",
+    "@types/react": "^19.2.2",
     "date-fns": "^4.1.0",
-    "react": "19.1.1",
+    "react": "19.2.0",
     "zod": "^3.25.76"
   },
   "typesVersions": {

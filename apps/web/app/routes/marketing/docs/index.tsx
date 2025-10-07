@@ -37,7 +37,7 @@ export default function DocsPage(props: Route.ComponentProps) {
   const cards = (data?.pages ?? []).filter((item) => !item.parentId);
 
   return (
-    <div className={'flex flex-col space-y-6 xl:space-y-10'}>
+    <div className={'flex flex-col space-y-6 xl:space-y-8'}>
       <SitePageHeader title={title} subtitle={description} />
 
       <div className={'flex flex-col items-center'}>

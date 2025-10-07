@@ -17,7 +17,7 @@ export const Header = forwardRef<HTMLDivElement, HeaderProps>(
       <div
         ref={ref}
         className={cn(
-          'site-header bg-background/80 dark:bg-background/50 sticky top-0 z-10 w-full py-1 backdrop-blur-md',
+          'site-header bg-background/80 dark:bg-background/80 sticky top-0 z-10 w-full backdrop-blur-lg',
           className,
         )}
         {...props}

@@ -3,8 +3,8 @@ import { data, redirect } from 'react-router';
 import { Cms, ContentRenderer, createCmsClient } from '@kit/cms';
 import { If } from '@kit/ui/if';
 import { Separator } from '@kit/ui/separator';
+import { cn } from '@kit/ui/utils';
 
-import { SitePageHeader } from '~/routes/marketing/_components/site-page-header';
 import type { Route } from '~/types/app/routes/marketing/docs/+types/$slug';
 
 import { DocsCards } from './_components/docs-cards';
@@ -48,24 +48,27 @@ export default function DocumentationPage(props: Route.ComponentProps) {
 
   return (
     <div className={'flex flex-1 flex-col'}>
-      <SitePageHeader
-        className={'lg:px-8'}
-        container={false}
-        title={page.title}
-        subtitle={description}
-      />
+      <article className={cn('gap-y-12 overflow-y-auto px-4')}>
+        <section
+          className={'flex flex-col gap-y-1 border-b border-dashed pb-4'}
+        >
+          <h1 className={'text-foreground text-3xl'}>{page.title}</h1>
 
-      <div className={'flex flex-col space-y-4 py-6 lg:px-8'}>
-        <article className={'markdoc'}>
+          <h2 className={'text-secondary-foreground/80 text-lg'}>
+            {description}
+          </h2>
+        </section>
+
+        <div className={'markdoc'}>
           <ContentRenderer content={page.content} />
-        </article>
+        </div>
 
         <If condition={page.children.length > 0}>
           <Separator />
 
           <DocsCards cards={(page.children ?? []) as Cms.ContentItem[]} />
         </If>
-      </div>
+      </article>
     </div>
   );
 }

@@ -3,7 +3,6 @@
 import type { Provider } from '@supabase/supabase-js';
 
 import { isBrowser } from '@kit/shared/utils';
-import { Alert, AlertDescription, AlertTitle } from '@kit/ui/alert';
 import { If } from '@kit/ui/if';
 import { Separator } from '@kit/ui/separator';
 import { Trans } from '@kit/ui/trans';
@@ -25,16 +24,11 @@ export function SignUpMethodsContainer(props: {
   };
 
   displayTermsCheckbox?: boolean;
-  inviteToken?: string;
 }) {
   const redirectUrl = getCallbackUrl(props);
 
   return (
     <>
-      <If condition={props.inviteToken}>
-        <InviteAlert />
-      </If>
-
       <If condition={props.providers.password}>
         <EmailPasswordSignUpContainer
           displayTermsCheckbox={props.displayTermsCheckbox}
@@ -45,7 +39,6 @@ export function SignUpMethodsContainer(props: {
       <If condition={props.providers.magicLink}>
         <MagicLinkAuthContainer
           shouldCreateUser={true}
-          inviteToken={props.inviteToken}
           redirectUrl={redirectUrl}
           displayTermsCheckbox={props.displayTermsCheckbox}
         />
@@ -66,7 +59,6 @@ export function SignUpMethodsContainer(props: {
 
         <OauthProviders
           enabledProviders={props.providers.oAuth}
-          inviteToken={props.inviteToken}
           shouldCreateUser={true}
           paths={{
             callback: props.paths.callback,
@@ -106,18 +98,4 @@ function getCallbackUrl(props: {
   }
 
   return url.href;
-}
-
-function InviteAlert() {
-  return (
-    <Alert variant={'info'}>
-      <AlertTitle>
-        <Trans i18nKey={'auth:inviteAlertHeading'} />
-      </AlertTitle>
-
-      <AlertDescription>
-        <Trans i18nKey={'auth:inviteAlertBody'} />
-      </AlertDescription>
-    </Alert>
-  );
 }

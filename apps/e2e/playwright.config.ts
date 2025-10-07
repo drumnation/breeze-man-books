@@ -7,7 +7,7 @@ const testIgnore: string[] = [];
 if (!enableBillingTests) {
   console.log(
     `Billing tests are disabled. To enable them, set the environment variable ENABLE_BILLING_TESTS=true.`,
-    `Current value: "${process.env.ENABLE_BILLING_TESTS}"`
+    `Current value: "${process.env.ENABLE_BILLING_TESTS}"`,
   );
 
   testIgnore.push('*-billing.spec.ts');
@@ -28,7 +28,7 @@ export default defineConfig({
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 3 : 1,
+  retries: process.env.CI ? 2 : 1,
   /* Ignore billing tests if the environment variable is not set. */
   testIgnore,
   /* Limit parallel tests on CI. */
@@ -58,8 +58,8 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] }
-    }
+      use: { ...devices['Desktop Chrome'] },
+    },
     /* Test against mobile viewports. */
     // {
     //   name: 'Mobile Chrome',
@@ -82,12 +82,14 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: process.env.PLAYWRIGHT_SERVER_COMMAND ? {
-    cwd: '../../',
-    command: process.env.PLAYWRIGHT_SERVER_COMMAND,
-    url: 'http://localhost:5173',
-    reuseExistingServer: !process.env.CI,
-    stdout: 'pipe',
-    stderr: 'pipe',
-  } : undefined
+  webServer: process.env.PLAYWRIGHT_SERVER_COMMAND
+    ? {
+        cwd: '../../',
+        command: process.env.PLAYWRIGHT_SERVER_COMMAND,
+        url: 'http://localhost:5173',
+        reuseExistingServer: !process.env.CI,
+        stdout: 'pipe',
+        stderr: 'pipe',
+      }
+    : undefined,
 });

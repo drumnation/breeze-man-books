@@ -31,6 +31,8 @@ test.describe('Password Reset Flow', () => {
 
       await page.goto('/auth/password-reset');
 
+      await page.waitForTimeout(250);
+
       await page.fill('[name="email"]', email);
       await page.click('[type="submit"]');
 

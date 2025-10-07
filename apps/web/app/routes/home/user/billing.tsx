@@ -13,6 +13,7 @@ import { PageBody } from '@kit/ui/page';
 import { Trans } from '@kit/ui/trans';
 
 import billingConfig from '~/config/billing.config';
+import { resolveProductPlan } from '~/lib/billing/.server/resolve-product-plan.server';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { requireUserLoader } from '~/lib/require-user-loader';
 import { HomeLayoutPageHeader } from '~/routes/home/user/_components/home-page-header';
@@ -40,17 +41,29 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     client,
   });
 
+  const variantId = data ? data.items[0]!.variant_id : '';
+
+  const productPlan = variantId
+    ? await resolveProductPlan(
+        client,
+        billingConfig,
+        variantId,
+        data?.currency || 'USD',
+      )
+    : null;
+
   return {
     title: t('account:billingTab'),
     data,
     customerId,
+    productPlan,
   };
 };
 
 export default function PersonalAccountBillingPage(
   props: Route.ComponentProps,
 ) {
-  const { data, customerId } = props.loaderData;
+  const { data, customerId, productPlan } = props.loaderData;
 
   return (
     <>
@@ -60,7 +73,7 @@ export default function PersonalAccountBillingPage(
       />
 
       <PageBody>
-        <div className={'flex flex-col space-y-4'}>
+        <div className={'flex max-w-2xl flex-col space-y-4'}>
           <If condition={!data}>
             <PersonalAccountCheckoutForm customerId={customerId} />
 
@@ -71,11 +84,12 @@ export default function PersonalAccountBillingPage(
 
           <If condition={data}>
             {(data) => (
-              <div className={'flex w-full max-w-2xl flex-col space-y-6'}>
+              <div className={'flex w-full flex-col space-y-6'}>
                 {'active' in data ? (
                   <CurrentSubscriptionCard
                     subscription={data}
-                    config={billingConfig}
+                    product={productPlan!.product}
+                    plan={productPlan!.plan}
                   />
                 ) : (
                   <CurrentLifetimeOrderCard
