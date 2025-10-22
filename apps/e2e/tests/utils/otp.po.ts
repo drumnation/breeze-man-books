@@ -16,8 +16,16 @@ export class OtpPo {
    * @param email The email address to send the OTP to
    */
   async completeOtpVerification(email: string) {
-    // Click the "Send Verification Code" button
-    await this.page.click('[data-test="otp-send-verification-button"]');
+    await expect(async () => {
+      // Click the "Send Verification Code" button
+      const button = this.page.locator(
+        '[data-test="otp-send-verification-button"]',
+      );
+
+      await expect(button).toBeVisible();
+
+      await button.click();
+    }).toPass();
 
     // wait for the OTP to be sent
     await this.page.waitForTimeout(500);

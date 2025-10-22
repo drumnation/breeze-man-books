@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
@@ -59,12 +59,8 @@ export function VerifyOtpForm({
   CancelButton,
   onSuccess,
 }: VerifyOtpFormProps) {
-  // Track the current step (email entry or OTP verification)
   const [step, setStep] = useState<'email' | 'otp'>('email');
-  // Track errors
   const [error, setError] = useState<string | null>(null);
-  // Track verification success
-  const [, setVerificationSuccess] = useState(false);
 
   const requestOtp = useRequestOtp();
 
@@ -95,18 +91,17 @@ export function VerifyOtpForm({
   };
 
   // Handle OTP verification
-  const handleVerifyOtp = (data: z.infer<typeof VerifyOtpSchema>) => {
-    setVerificationSuccess(true);
-    onSuccess(data.otp);
-  };
+  const handleVerifyOtp = useCallback(
+    (data: z.infer<typeof VerifyOtpSchema>) => {
+      onSuccess(data.otp);
+    },
+    [onSuccess],
+  );
 
   useEffect(() => {
-    if (requestOtp.data) {
-      if (requestOtp.data.success) {
-        setStep('otp');
-      } else {
-        setError('Failed to send OTP. Please try again.');
-      }
+    if (requestOtp.data?.success) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setStep('otp');
     }
   }, [requestOtp.data]);
 

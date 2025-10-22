@@ -14,10 +14,14 @@ export const MembershipRoleSelector: React.FC<{
   value: Role;
   currentUserRole?: Role;
   onChange: (role: Role) => unknown;
-}> = ({ roles, value, currentUserRole, onChange }) => {
+  triggerClassName?: string;
+}> = ({ roles, value, currentUserRole, onChange, triggerClassName }) => {
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger data-test={'role-selector-trigger'}>
+      <SelectTrigger
+        data-test={'role-selector-trigger'}
+        className={triggerClassName}
+      >
         <SelectValue />
       </SelectTrigger>
 

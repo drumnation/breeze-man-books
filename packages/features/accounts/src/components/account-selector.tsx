@@ -68,26 +68,8 @@ export function AccountSelector({
     return selectedAccount ?? PERSONAL_ACCOUNT_SLUG;
   }, [selectedAccount]);
 
-  const Icon = (props: { item: string }) => {
-    return (
-      <CheckCircle
-        className={cn(
-          'ml-auto h-4 w-4',
-          value === props.item ? 'opacity-100' : 'opacity-0',
-        )}
-      />
-    );
-  };
-
   const selected = accounts.find((account) => account.value === value);
   const pictureUrl = personalData.data?.picture_url;
-
-  const PersonalAccountAvatar = () =>
-    pictureUrl ? (
-      <UserAvatar pictureUrl={pictureUrl} />
-    ) : (
-      <PersonIcon className="h-5 w-5" />
-    );
 
   return (
     <>
@@ -100,7 +82,7 @@ export function AccountSelector({
             role="combobox"
             aria-expanded={open}
             className={cn(
-              'dark:shadow-primary/10 group w-full min-w-0 px-2 lg:w-auto lg:max-w-fit',
+              'dark:shadow-primary/10 group mr-1 w-full min-w-0 px-2 lg:w-auto lg:max-w-fit',
               {
                 'justify-start': !collapsed,
                 'm-auto justify-center px-2 lg:w-full': collapsed,
@@ -114,10 +96,10 @@ export function AccountSelector({
                 <span
                   className={cn('flex max-w-full items-center', {
                     'justify-center gap-x-0': collapsed,
-                    'gap-x-4': !collapsed,
+                    'gap-x-2': !collapsed,
                   })}
                 >
-                  <PersonalAccountAvatar />
+                  <PersonalAccountAvatar pictureUrl={pictureUrl} />
 
                   <span
                     className={cn('truncate', {
@@ -133,10 +115,10 @@ export function AccountSelector({
                 <span
                   className={cn('flex max-w-full items-center', {
                     'justify-center gap-x-0': collapsed,
-                    'gap-x-4': !collapsed,
+                    'gap-x-2': !collapsed,
                   })}
                 >
-                  <Avatar className={'rounded-xs h-6 w-6'}>
+                  <Avatar className={'h-6 w-6 rounded-xs'}>
                     <AvatarImage src={account.image ?? undefined} />
 
                     <AvatarFallback
@@ -158,7 +140,7 @@ export function AccountSelector({
             </If>
 
             <CaretSortIcon
-              className={cn('ml-2 h-4 w-4 shrink-0 opacity-50', {
+              className={cn('ml-1 h-4 w-4 shrink-0 opacity-50', {
                 hidden: collapsed,
               })}
             />
@@ -176,6 +158,7 @@ export function AccountSelector({
             <CommandList>
               <CommandGroup>
                 <CommandItem
+                  className="shadow-none"
                   onSelect={() => onAccountChange(undefined)}
                   value={PERSONAL_ACCOUNT_SLUG}
                 >
@@ -185,7 +168,7 @@ export function AccountSelector({
                     <Trans i18nKey={'teams:personalAccount'} />
                   </span>
 
-                  <Icon item={PERSONAL_ACCOUNT_SLUG} />
+                  <Icon selected={value === PERSONAL_ACCOUNT_SLUG} />
                 </CommandItem>
               </CommandGroup>
 
@@ -206,7 +189,7 @@ export function AccountSelector({
                       data-name={account.label}
                       data-slug={account.value}
                       className={cn(
-                        'group my-1 flex justify-between transition-colors',
+                        'group my-1 flex justify-between shadow-none transition-colors',
                         {
                           ['bg-muted']: value === account.value,
                         },
@@ -222,14 +205,12 @@ export function AccountSelector({
                       }}
                     >
                       <div className={'flex items-center'}>
-                        <Avatar className={'rounded-xs mr-2 h-6 w-6'}>
+                        <Avatar className={'mr-2 h-6 w-6 rounded-xs'}>
                           <AvatarImage src={account.image ?? undefined} />
 
                           <AvatarFallback
                             className={cn('rounded-xs', {
                               ['bg-background']: value === account.value,
-                              ['group-hover:bg-background']:
-                                value !== account.value,
                             })}
                           >
                             {account.label ? account.label[0] : ''}
@@ -241,7 +222,7 @@ export function AccountSelector({
                         </span>
                       </div>
 
-                      <Icon item={account.value ?? ''} />
+                      <Icon selected={(account.value ?? '') === value} />
                     </CommandItem>
                   ))}
                 </CommandGroup>
@@ -286,8 +267,24 @@ export function AccountSelector({
 
 function UserAvatar(props: { pictureUrl?: string }) {
   return (
-    <Avatar className={'rounded-xs h-6 w-6'}>
+    <Avatar className={'h-6 w-6 rounded-xs'}>
       <AvatarImage src={props.pictureUrl} />
     </Avatar>
+  );
+}
+
+function Icon({ selected }: { selected: boolean }) {
+  return (
+    <CheckCircle
+      className={cn('ml-auto h-4 w-4', selected ? 'opacity-100' : 'opacity-0')}
+    />
+  );
+}
+
+function PersonalAccountAvatar({ pictureUrl }: { pictureUrl?: string | null }) {
+  return pictureUrl ? (
+    <UserAvatar pictureUrl={pictureUrl} />
+  ) : (
+    <PersonIcon className="h-5 w-5" />
   );
 }

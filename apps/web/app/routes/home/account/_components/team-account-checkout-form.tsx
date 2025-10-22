@@ -1,5 +1,3 @@
-import { useEffect, useState } from 'react';
-
 import { useFetcher } from 'react-router';
 
 import { EmbeddedCheckout } from '@kit/billing-gateway/checkout';
@@ -24,10 +22,6 @@ export function TeamAccountCheckoutForm(params: {
 }) {
   const appEvents = useAppEvents();
 
-  const [checkoutToken, setCheckoutToken] = useState<string | undefined>(
-    undefined,
-  );
-
   const fetcher = useFetcher<{
     checkoutToken: string;
   }>();
@@ -36,12 +30,7 @@ export function TeamAccountCheckoutForm(params: {
 
   // only allow trial if the user is not already a customer
   const canStartTrial = !params.customerId;
-
-  useEffect(() => {
-    if (fetcher.data?.checkoutToken) {
-      setCheckoutToken(fetcher.data.checkoutToken);
-    }
-  }, [fetcher.data?.checkoutToken]);
+  const checkoutToken = fetcher.data?.checkoutToken;
 
   return (
     <>
@@ -49,7 +38,11 @@ export function TeamAccountCheckoutForm(params: {
         <EmbeddedCheckout
           checkoutToken={checkoutToken!}
           provider={billingConfig.provider}
-          onClose={() => setCheckoutToken(undefined)}
+          onClose={() =>
+            fetcher.unstable_reset({
+              reason: 'Checkout was closed',
+            })
+          }
         />
       </If>
 

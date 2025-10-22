@@ -1,6 +1,6 @@
 'use client';
 
-import { useContext, useId, useRef, useState } from 'react';
+import { useContext, useId, useState } from 'react';
 
 import { NavLink, useLocation } from 'react-router';
 
@@ -42,23 +42,20 @@ export function Sidebar(props: {
       }) => React.ReactNode);
 }) {
   const [collapsed, setCollapsed] = useState(props.collapsed ?? false);
-  const isExpandedRef = useRef<boolean>(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const expandOnHover =
     props.expandOnHover ??
-    import.meta.env.VITE_EXPAND_SIDEBAR_ON_HOVER === 'true';
+    process.env.NEXT_PUBLIC_EXPAND_SIDEBAR_ON_HOVER === 'true';
 
-  const sidebarSizeClassName = getSidebarSizeClassName(
-    collapsed,
-    isExpandedRef.current,
-  );
+  const sidebarSizeClassName = getSidebarSizeClassName(collapsed, isExpanded);
 
   const className = getClassNameBuilder(
     cn(props.className ?? '', sidebarSizeClassName, {}),
   )();
 
   const containerClassName = cn(sidebarSizeClassName, 'bg-inherit', {
-    'max-w-[4rem]': expandOnHover && isExpandedRef.current,
+    'max-w-[4rem]': expandOnHover && isExpanded,
   });
 
   const ctx = { collapsed, setCollapsed };
@@ -67,7 +64,7 @@ export function Sidebar(props: {
     props.collapsed && expandOnHover
       ? () => {
           setCollapsed(false);
-          isExpandedRef.current = true;
+          setIsExpanded(true);
         }
       : undefined;
 
@@ -76,11 +73,11 @@ export function Sidebar(props: {
       ? () => {
           if (!isRadixPopupOpen()) {
             setCollapsed(true);
-            isExpandedRef.current = false;
+            setIsExpanded(false);
           } else {
             onRadixPopupClose(() => {
               setCollapsed(true);
-              isExpandedRef.current = false;
+              setIsExpanded(false);
             });
           }
         }
@@ -123,6 +120,66 @@ export function SidebarContent({
   return <div className={className}>{children}</div>;
 }
 
+function SidebarGroupWrapper({
+  id,
+  sidebarCollapsed,
+  collapsible,
+  isGroupCollapsed,
+  setIsGroupCollapsed,
+  label,
+}: {
+  id: string;
+  sidebarCollapsed: boolean;
+  collapsible: boolean;
+  isGroupCollapsed: boolean;
+  setIsGroupCollapsed: (isGroupCollapsed: boolean) => void;
+  label: React.ReactNode;
+}) {
+  const className = cn(
+    'px-container group flex items-center justify-between space-x-2.5',
+    {
+      'py-2.5': !sidebarCollapsed,
+    },
+  );
+
+  if (collapsible) {
+    return (
+      <button
+        aria-expanded={!isGroupCollapsed}
+        aria-controls={id}
+        onClick={() => setIsGroupCollapsed(!isGroupCollapsed)}
+        className={className}
+      >
+        <span
+          className={'text-muted-foreground text-xs font-semibold uppercase'}
+        >
+          {label}
+        </span>
+
+        <If condition={collapsible}>
+          <ChevronDown
+            className={cn(`h-3 transition duration-300`, {
+              'rotate-180': !isGroupCollapsed,
+            })}
+          />
+        </If>
+      </button>
+    );
+  }
+
+  if (sidebarCollapsed) {
+    return null;
+  }
+
+  return (
+    <div className={className}>
+      <span className={'text-muted-foreground text-xs font-semibold uppercase'}>
+        {label}
+      </span>
+    </div>
+  );
+}
+
 export function SidebarGroup({
   label,
   collapsed = false,
@@ -137,61 +194,20 @@ export function SidebarGroup({
   const [isGroupCollapsed, setIsGroupCollapsed] = useState(collapsed);
   const id = useId();
 
-  const Title = (props: React.PropsWithChildren) => {
-    if (sidebarCollapsed) {
-      return null;
-    }
-
-    return (
-      <span className={'text-muted-foreground text-xs font-semibold uppercase'}>
-        {props.children}
-      </span>
-    );
-  };
-
-  const Wrapper = () => {
-    const className = cn(
-      'px-container group flex items-center justify-between space-x-2.5',
-      {
-        'py-2.5': !sidebarCollapsed,
-      },
-    );
-
-    if (collapsible) {
-      return (
-        <button
-          aria-expanded={!isGroupCollapsed}
-          aria-controls={id}
-          onClick={() => setIsGroupCollapsed(!isGroupCollapsed)}
-          className={className}
-        >
-          <Title>{label}</Title>
-
-          <If condition={collapsible}>
-            <ChevronDown
-              className={cn(`h-3 transition duration-300`, {
-                'rotate-180': !isGroupCollapsed,
-              })}
-            />
-          </If>
-        </button>
-      );
-    }
-
-    return (
-      <div className={className}>
-        <Title>{label}</Title>
-      </div>
-    );
-  };
-
   return (
     <div
       className={cn('flex flex-col', {
-        'space-y-1 py-1': !collapsed,
+        'gap-y-2 py-1': !collapsed,
       })}
     >
-      <Wrapper />
+      <SidebarGroupWrapper
+        id={id}
+        sidebarCollapsed={sidebarCollapsed}
+        collapsible={collapsible}
+        isGroupCollapsed={isGroupCollapsed}
+        setIsGroupCollapsed={setIsGroupCollapsed}
+        label={label}
+      />
 
       <If condition={collapsible ? !isGroupCollapsed : true}>
         <div id={id} className={'flex flex-col space-y-1.5'}>
@@ -265,7 +281,7 @@ export function SidebarItem({
 function getClassNameBuilder(className: string) {
   return cva([
     cn(
-      'group/sidebar transition-width fixed box-content flex h-screen w-2/12 flex-col bg-inherit backdrop-blur-sm duration-200',
+      'group/sidebar transition-width fixed box-content flex h-screen w-2/12 flex-col bg-inherit backdrop-blur-xs duration-200',
       className,
     ),
   ]);
@@ -327,16 +343,24 @@ export function SidebarNavigation({
               collapsed={item.collapsed}
             >
               {item.children.map((child) => {
-                return (
-                  <SidebarItem
-                    key={child.path}
-                    end={child.end}
-                    path={child.path}
-                    Icon={child.Icon}
-                  >
-                    <Trans i18nKey={child.label} defaults={child.label} />
-                  </SidebarItem>
-                );
+                if ('collapsible' in child && child.collapsible) {
+                  throw new Error(
+                    'Collapsible groups are not supported in the old Sidebar. Please migrate to the new Sidebar.',
+                  );
+                }
+
+                if ('path' in child) {
+                  return (
+                    <SidebarItem
+                      key={child.path}
+                      end={child.end}
+                      path={child.path}
+                      Icon={child.Icon}
+                    >
+                      <Trans i18nKey={child.label} defaults={child.label} />
+                    </SidebarItem>
+                  );
+                }
               })}
             </SidebarGroup>
           );

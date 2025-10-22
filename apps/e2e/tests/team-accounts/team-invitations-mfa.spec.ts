@@ -74,10 +74,7 @@ test.describe('Team Invitation with MFA Flow', () => {
 
     // Step 3: Verify team invitation is visible and accept it
     // Accept the team invitation
-    await Promise.all([
-      invitations.acceptInvitation(),
-      page.waitForURL(`/home/${teamSlug}`),
-    ]);
+    await invitations.acceptInvitation();
 
     // Step 4: Verify membership was successful
     // Open account selector to verify team is available

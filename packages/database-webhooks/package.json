@@ -21,7 +21,7 @@
     "@kit/stripe": "workspace:*",
     "@kit/supabase": "workspace:*",
     "@kit/tsconfig": "workspace:*",
-    "@supabase/supabase-js": "^2.74.0",
+    "@supabase/supabase-js": "catalog:",
     "zod": "^3.25.76"
   },
   "typesVersions": {

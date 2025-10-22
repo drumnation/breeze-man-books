@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 
 import { useFetcher } from 'react-router';
 
@@ -23,8 +23,6 @@ export const RemoveMemberDialog: React.FC<{
   teamAccountId: string;
   userId: string;
 }> = ({ isOpen, setIsOpen, teamAccountId, userId }) => {
-  const [error, setError] = useState<boolean>();
-
   const csrfToken = useCsrfToken();
 
   const fetcher = useFetcher<{
@@ -32,14 +30,11 @@ export const RemoveMemberDialog: React.FC<{
   }>();
 
   const pending = fetcher.state === 'submitting';
+  const error = fetcher.data && !fetcher.data.success;
 
   useEffect(() => {
-    if (fetcher.data) {
-      if (fetcher.data.success) {
-        setIsOpen(false);
-      } else {
-        setError(true);
-      }
+    if (fetcher.data?.success) {
+      setIsOpen(false);
     }
   }, [fetcher.data, setIsOpen]);
 

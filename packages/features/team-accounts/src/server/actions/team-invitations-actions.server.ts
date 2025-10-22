@@ -68,7 +68,7 @@ export const updateInvitationAction = async (params: {
 
 /**
  * @name acceptInvitationAction
- * @description Accepts an invitation to join a team.
+ * @description Accepts an invitation to join a team and redirects to the next path.
  */
 export const acceptInvitationAction = async (params: {
   client: SupabaseClient<Database>;
@@ -107,6 +107,7 @@ export const acceptInvitationAction = async (params: {
   // Increase the seats for the account
   await perSeatBillingService.increaseSeats(accountId);
 
+  // Redirect to the next path
   return redirect(nextPath);
 };
 

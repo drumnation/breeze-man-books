@@ -24,6 +24,7 @@ export function SignUpMethodsContainer(props: {
   };
 
   displayTermsCheckbox?: boolean;
+  captchaSiteKey?: string;
 }) {
   const redirectUrl = getCallbackUrl(props);
 
@@ -33,6 +34,7 @@ export function SignUpMethodsContainer(props: {
         <EmailPasswordSignUpContainer
           displayTermsCheckbox={props.displayTermsCheckbox}
           emailRedirectTo={redirectUrl}
+          captchaSiteKey={props.captchaSiteKey}
         />
       </If>
 
@@ -41,6 +43,7 @@ export function SignUpMethodsContainer(props: {
           shouldCreateUser={true}
           redirectUrl={redirectUrl}
           displayTermsCheckbox={props.displayTermsCheckbox}
+          captchaSiteKey={props.captchaSiteKey}
         />
       </If>
 

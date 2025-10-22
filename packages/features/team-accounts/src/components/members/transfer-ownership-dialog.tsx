@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 import { useFetcher } from 'react-router';
 
@@ -55,7 +55,7 @@ export const TransferOwnershipDialog: React.FC<{
           accountId={accountId}
           userId={userId}
           targetDisplayName={targetDisplayName}
-          setIsOpen={setIsOpen}
+          onSuccess={() => setIsOpen(false)}
         />
       </AlertDialogContent>
     </AlertDialog>
@@ -66,14 +66,13 @@ function TransferOrganizationOwnershipForm({
   accountId,
   userId,
   targetDisplayName,
-  setIsOpen,
+  onSuccess,
 }: {
   userId: string;
   accountId: string;
   targetDisplayName: string;
-  setIsOpen: (isOpen: boolean) => void;
+  onSuccess: () => void;
 }) {
-  const [error, setError] = useState<boolean>();
   const user = useUser();
   const csrfToken = useCsrfToken();
 
@@ -92,17 +91,14 @@ function TransferOrganizationOwnershipForm({
   });
 
   const pending = fetcher.state === 'submitting';
+  const error = fetcher.data && !fetcher.data.success;
   const { otp } = useWatch({ control: form.control });
 
   useEffect(() => {
-    if (fetcher.data) {
-      if (fetcher.data.success) {
-        setIsOpen(false);
-      } else {
-        setError(true);
-      }
+    if (fetcher.data?.success) {
+      onSuccess();
     }
-  }, [fetcher.data, setIsOpen]);
+  }, [fetcher.data, onSuccess]);
 
   if (!otp) {
     return (

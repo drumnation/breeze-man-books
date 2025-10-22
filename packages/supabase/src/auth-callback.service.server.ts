@@ -68,7 +68,6 @@ class AuthCallbackService {
 
     // remove the query params from the url
     searchParams.delete('token_hash');
-    searchParams.delete('type');
     searchParams.delete('next');
     searchParams.delete('callback');
 

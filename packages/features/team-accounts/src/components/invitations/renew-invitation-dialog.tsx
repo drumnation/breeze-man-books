@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 import { useFetcher } from 'react-router';
 
@@ -40,7 +40,7 @@ export const RenewInvitationDialog: React.FC<{
         </AlertDialogHeader>
 
         <RenewInvitationForm
-          setIsOpen={setIsOpen}
+          onSuccess={() => setIsOpen(false)}
           invitationId={invitationId}
         />
       </AlertDialogContent>
@@ -50,10 +50,10 @@ export const RenewInvitationDialog: React.FC<{
 
 function RenewInvitationForm({
   invitationId,
-  setIsOpen,
+  onSuccess,
 }: {
   invitationId: number;
-  setIsOpen: (isOpen: boolean) => void;
+  onSuccess: () => void;
 }) {
   const fetcher = useFetcher<{
     success: boolean;
@@ -61,18 +61,13 @@ function RenewInvitationForm({
 
   const csrfToken = useCsrfToken();
   const pending = fetcher.state === 'submitting';
-
-  const [error, setError] = useState<boolean>();
+  const error = fetcher.data && !fetcher.data.success;
 
   useEffect(() => {
-    if (fetcher.data) {
-      if (fetcher.data.success) {
-        setIsOpen(false);
-      } else {
-        setError(true);
-      }
+    if (fetcher.data?.success) {
+      onSuccess();
     }
-  }, [fetcher.data, setIsOpen]);
+  }, [fetcher.data, onSuccess]);
 
   const inInvitationRenewed = () => {
     return fetcher.submit(

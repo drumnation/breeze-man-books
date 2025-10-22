@@ -43,7 +43,7 @@ export function PostPreview({
             </div>
           </div>
 
-          <h2 className="text-lg font-medium leading-snug tracking-tight">
+          <h2 className="text-lg leading-snug font-medium tracking-tight">
             <span className="hover:underline">{title}</span>
           </h2>
         </div>

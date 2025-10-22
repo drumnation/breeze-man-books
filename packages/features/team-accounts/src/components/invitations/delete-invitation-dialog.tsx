@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 import { useFetcher } from 'react-router';
 
@@ -37,7 +37,7 @@ export const DeleteInvitationDialog: React.FC<{
 
         <DeleteInvitationForm
           invitationId={invitationId}
-          setIsOpen={setIsOpen}
+          onSuccess={() => setIsOpen(false)}
         />
       </AlertDialogContent>
     </AlertDialog>
@@ -46,12 +46,11 @@ export const DeleteInvitationDialog: React.FC<{
 
 function DeleteInvitationForm({
   invitationId,
-  setIsOpen,
+  onSuccess,
 }: {
   invitationId: number;
-  setIsOpen: (isOpen: boolean) => void;
+  onSuccess: () => void;
 }) {
-  const [error, setError] = useState<boolean>();
   const csrfToken = useCsrfToken();
 
   const fetcher = useFetcher<{
@@ -59,16 +58,13 @@ function DeleteInvitationForm({
   }>();
 
   const pending = fetcher.state !== 'idle';
+  const error = fetcher.data?.success === false;
 
   useEffect(() => {
-    if (fetcher.data) {
-      if (fetcher.data.success) {
-        setIsOpen(false);
-      } else {
-        setError(true);
-      }
+    if (fetcher.data?.success) {
+      onSuccess();
     }
-  }, [fetcher.data, setIsOpen]);
+  }, [fetcher.data, onSuccess]);
 
   return (
     <form

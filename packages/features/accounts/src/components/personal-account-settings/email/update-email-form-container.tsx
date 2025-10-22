@@ -12,14 +12,13 @@ export function UpdateEmailFormContainer(props: { callbackPath: string }) {
     return <LoadingOverlay fullPage={false} />;
   }
 
-  if (!user?.email) {
+  const currentEmail = user?.email;
+
+  if (!currentEmail) {
     return null;
   }
 
   return (
-    <UpdateEmailForm
-      callbackPath={props.callbackPath}
-      currentEmail={user.email}
-    />
+    <UpdateEmailForm callbackPath={props.callbackPath} email={currentEmail} />
   );
 }

@@ -45,6 +45,7 @@ async function setupTeamWithMember(page: Page, memberRole = 'member') {
 
   // Sign out and sign back in as the original owner
   await page.context().clearCookies();
+  await page.reload();
 
   await page.goto('/auth/sign-in');
 
@@ -293,6 +294,8 @@ test.describe('Team Account Security', () => {
     });
 
     await userBTeamAccounts.auth.visitConfirmEmailLink(emailB);
+
+    await page.waitForLoadState('networkidle');
 
     // 4. Attempt to access the team page with User B
     await userBPage.goto(`/home/${teamSlug}`);

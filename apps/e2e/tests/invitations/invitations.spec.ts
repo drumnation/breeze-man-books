@@ -126,7 +126,6 @@ test.describe('Full Invitation Flow', () => {
 
     // sign out and sign in with the first email
     await page.context().clearCookies();
-    await page.reload();
 
     console.log(`Finding email to ${firstEmail} ...`);
 

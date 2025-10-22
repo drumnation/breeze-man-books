@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 
-import { useLocation } from 'react-router';
+import { Link, useLocation } from 'react-router';
 
 import {
   Breadcrumb,
@@ -57,13 +57,10 @@ export function AppBreadcrumbs(props: {
                   condition={index < visiblePaths.length - 1}
                   fallback={label}
                 >
-                  <BreadcrumbLink
-                    href={
-                      '/' +
-                      splitPath.slice(0, splitPath.indexOf(path) + 1).join('/')
-                    }
-                  >
-                    {label}
+                  <BreadcrumbLink asChild>
+                    <Link to={`/${splitPath.slice(0, index + 1).join('/')}`}>
+                      {label}
+                    </Link>
                   </BreadcrumbLink>
                 </If>
               </BreadcrumbItem>

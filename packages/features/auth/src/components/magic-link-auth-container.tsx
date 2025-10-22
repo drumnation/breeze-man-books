@@ -23,19 +23,21 @@ import { If } from '@kit/ui/if';
 import { Input } from '@kit/ui/input';
 import { Trans } from '@kit/ui/trans';
 
-import { useCaptchaToken } from '../captcha/client';
+import { useCaptcha } from '../captcha/client';
 import { TermsAndConditionsFormField } from './terms-and-conditions-form-field';
 
 export function MagicLinkAuthContainer({
   displayTermsCheckbox,
   redirectUrl,
   shouldCreateUser,
+  captchaSiteKey,
 }: {
   displayTermsCheckbox?: boolean;
   shouldCreateUser: boolean;
   redirectUrl: string;
+  captchaSiteKey?: string;
 }) {
-  const { captchaToken, resetCaptchaToken } = useCaptchaToken();
+  const captcha = useCaptcha({ siteKey: captchaSiteKey });
   const { t } = useTranslation();
   const signInWithOtpMutation = useSignInWithOtp();
   const appEvents = useAppEvents();
@@ -61,7 +63,7 @@ export function MagicLinkAuthContainer({
         email,
         options: {
           emailRedirectTo,
-          captchaToken,
+          captchaToken: captcha.token,
           shouldCreateUser,
         },
       });
@@ -82,7 +84,7 @@ export function MagicLinkAuthContainer({
       error: t(`auth:errors.link`),
     });
 
-    resetCaptchaToken();
+    captcha.reset();
   };
 
   if (signInWithOtpMutation.data) {
@@ -95,6 +97,8 @@ export function MagicLinkAuthContainer({
         <If condition={signInWithOtpMutation.error}>
           <ErrorAlert />
         </If>
+
+        {captcha.field}
 
         <div className={'flex flex-col space-y-4'}>
           <FormField

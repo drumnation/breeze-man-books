@@ -12,6 +12,7 @@ const rootRoutes = [
   route('healthcheck', 'routes/healthcheck.ts'),
   route('update-password', 'routes/update-password.tsx'),
   route('join', 'routes/join.tsx'),
+  route('identities', 'routes/identities.tsx'),
 ];
 
 const apiRoutes = [

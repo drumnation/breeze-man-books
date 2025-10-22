@@ -5,7 +5,7 @@ import { Link, useSearchParams } from 'react-router';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ColumnDef } from '@tanstack/react-table';
 import { EllipsisVertical } from 'lucide-react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 
 import { Tables } from '@kit/supabase/database';
@@ -96,6 +96,11 @@ function AccountsTableFilters(props: {
     });
   };
 
+  const type = useWatch({
+    name: 'type',
+    control: form.control,
+  });
+
   return (
     <Form {...form}>
       <form
@@ -103,7 +108,7 @@ function AccountsTableFilters(props: {
         onSubmit={form.handleSubmit((data) => onSubmit(data))}
       >
         <Select
-          value={form.watch('type')}
+          value={type}
           onValueChange={(value) => {
             form.setValue(
               'type',

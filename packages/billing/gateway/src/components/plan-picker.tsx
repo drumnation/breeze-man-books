@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowRight, CheckCircle } from 'lucide-react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
@@ -93,10 +93,18 @@ export function PlanPicker(
     },
   });
 
-  const { interval: selectedInterval } = form.watch();
-  const planId = form.getValues('planId');
+  const { interval: selectedInterval, planId } = useWatch({
+    control: form.control,
+  });
 
   const { plan: selectedPlan, product: selectedProduct } = useMemo(() => {
+    if (!planId) {
+      return {
+        plan: null,
+        product: null,
+      };
+    }
+
     try {
       return getProductPlanPair(props.config, planId);
     } catch {
@@ -117,7 +125,7 @@ export function PlanPicker(
     <Form {...form}>
       <div
         className={
-          'flex flex-col space-y-4 lg:flex-row lg:space-x-4 lg:space-y-0'
+          'flex flex-col space-y-4 lg:flex-row lg:space-y-0 lg:space-x-4'
         }
       >
         <form
@@ -314,7 +322,7 @@ export function PlanPicker(
 
                             <div
                               className={
-                                'flex flex-col space-y-2 lg:flex-row lg:items-center lg:space-x-4 lg:space-y-0 lg:text-right'
+                                'flex flex-col space-y-2 lg:flex-row lg:items-center lg:space-y-0 lg:space-x-4 lg:text-right'
                               }
                             >
                               <div>
@@ -420,6 +428,7 @@ function PlanDetails({
   const isRecurring = selectedPlan.paymentType === 'recurring';
 
   // trick to force animation on re-render
+  // eslint-disable-next-line react-hooks/purity
   const key = Math.random();
 
   return (

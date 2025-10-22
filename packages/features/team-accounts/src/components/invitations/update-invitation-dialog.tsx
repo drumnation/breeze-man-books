@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 
 import { useFetcher } from 'react-router';
 
@@ -43,7 +43,6 @@ export const UpdateInvitationDialog: React.FC<{
   userRole: Role;
   userRoleHierarchy: number;
 }> = ({ isOpen, setIsOpen, invitationId, userRole, userRoleHierarchy }) => {
-  const [error, setError] = useState<boolean>();
   const csrfToken = useCsrfToken();
 
   const fetcher = useFetcher<{
@@ -51,14 +50,11 @@ export const UpdateInvitationDialog: React.FC<{
   }>();
 
   const pending = fetcher.state === 'submitting';
+  const error = fetcher.data && !fetcher.data.success;
 
   useEffect(() => {
     if (fetcher.data?.success) {
       setIsOpen(false);
-    }
-
-    if (fetcher.data && !fetcher.data.success) {
-      setError(true);
     }
   }, [fetcher.data, setIsOpen]);
 

@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 
+import type { PostgrestError } from '@supabase/supabase-js';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
-import { Check } from 'lucide-react';
+import { Check, Lock, XIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
 
 import { useUpdateUser } from '@kit/supabase/hooks/use-update-user-mutation';
 import { Alert, AlertDescription, AlertTitle } from '@kit/ui/alert';
@@ -18,12 +19,15 @@ import {
   FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@kit/ui/form';
 import { If } from '@kit/ui/if';
-import { Input } from '@kit/ui/input';
-import { Label } from '@kit/ui/label';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from '@kit/ui/input-group';
+import { toast } from '@kit/ui/sonner';
 import { Trans } from '@kit/ui/trans';
 
 import { PasswordUpdateSchema } from '../../../schema/update-password.schema';
@@ -31,9 +35,11 @@ import { PasswordUpdateSchema } from '../../../schema/update-password.schema';
 export const UpdatePasswordForm = ({
   email,
   callbackPath,
+  onSuccess,
 }: {
   email: string;
   callbackPath: string;
+  onSuccess?: () => void;
 }) => {
   const { t } = useTranslation('account');
   const updateUserMutation = useUpdateUser();
@@ -44,6 +50,7 @@ export const UpdatePasswordForm = ({
 
     const promise = updateUserMutation
       .mutateAsync({ password, redirectTo })
+      .then(onSuccess)
       .catch((error) => {
         if (
           typeof error === 'string' &&
@@ -55,11 +62,13 @@ export const UpdatePasswordForm = ({
         }
       });
 
-    toast.promise(() => promise, {
-      success: t(`updatePasswordSuccess`),
-      error: t(`updatePasswordError`),
-      loading: t(`updatePasswordLoading`),
-    });
+    toast
+      .promise(() => promise, {
+        success: t(`updatePasswordSuccess`),
+        error: t(`updatePasswordError`),
+        loading: t(`updatePasswordLoading`),
+      })
+      .unwrap();
   };
 
   const updatePasswordCallback = async ({
@@ -97,65 +106,76 @@ export const UpdatePasswordForm = ({
             <SuccessAlert />
           </If>
 
+          <If condition={updateUserMutation.error}>
+            {(error) => <ErrorAlert error={error as PostgrestError} />}
+          </If>
+
           <If condition={needsReauthentication}>
             <NeedsReauthenticationAlert />
           </If>
 
-          <FormField
-            name={'newPassword'}
-            render={({ field }) => {
-              return (
-                <FormItem>
-                  <FormLabel>
-                    <Label>
-                      <Trans i18nKey={'account:newPassword'} />
-                    </Label>
-                  </FormLabel>
+          <div className="flex flex-col space-y-2">
+            <FormField
+              name={'newPassword'}
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <FormControl>
+                      <InputGroup className="dark:bg-background">
+                        <InputGroupAddon align="inline-start">
+                          <Lock className="h-4 w-4" />
+                        </InputGroupAddon>
 
-                  <FormControl>
-                    <Input
-                      data-test={'account-password-form-password-input'}
-                      required
-                      type={'password'}
-                      {...field}
-                    />
-                  </FormControl>
+                        <InputGroupInput
+                          data-test={'account-password-form-password-input'}
+                          autoComplete={'new-password'}
+                          required
+                          type={'password'}
+                          placeholder={t('account:newPassword')}
+                          {...field}
+                        />
+                      </InputGroup>
+                    </FormControl>
 
-                  <FormMessage />
-                </FormItem>
-              );
-            }}
-          />
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
 
-          <FormField
-            name={'repeatPassword'}
-            render={({ field }) => {
-              return (
-                <FormItem>
-                  <FormLabel>
-                    <Label>
-                      <Trans i18nKey={'account:repeatPassword'} />
-                    </Label>
-                  </FormLabel>
+            <FormField
+              name={'repeatPassword'}
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <FormControl>
+                      <InputGroup className="dark:bg-background">
+                        <InputGroupAddon align="inline-start">
+                          <Lock className="h-4 w-4" />
+                        </InputGroupAddon>
 
-                  <FormControl>
-                    <Input
-                      data-test={'account-password-form-repeat-password-input'}
-                      required
-                      type={'password'}
-                      {...field}
-                    />
-                  </FormControl>
+                        <InputGroupInput
+                          data-test={
+                            'account-password-form-repeat-password-input'
+                          }
+                          required
+                          type={'password'}
+                          placeholder={t('account:repeatPassword')}
+                          {...field}
+                        />
+                      </InputGroup>
+                    </FormControl>
 
-                  <FormDescription>
-                    <Trans i18nKey={'account:repeatPasswordDescription'} />
-                  </FormDescription>
+                    <FormDescription>
+                      <Trans i18nKey={'account:repeatPasswordDescription'} />
+                    </FormDescription>
 
-                  <FormMessage />
-                </FormItem>
-              );
-            }}
-          />
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
+          </div>
 
           <div>
             <Button disabled={updateUserMutation.isPending}>
@@ -167,6 +187,27 @@ export const UpdatePasswordForm = ({
     </Form>
   );
 };
+
+function ErrorAlert({ error }: { error: { code: string } }) {
+  const { t } = useTranslation();
+
+  return (
+    <Alert variant={'destructive'}>
+      <XIcon className={'h-4'} />
+
+      <AlertTitle>
+        <Trans i18nKey={'account:updatePasswordError'} />
+      </AlertTitle>
+
+      <AlertDescription>
+        <Trans
+          i18nKey={`auth:errors.${error.code}`}
+          defaults={t('auth:resetPasswordError')}
+        />
+      </AlertDescription>
+    </Alert>
+  );
+}
 
 function SuccessAlert() {
   return (

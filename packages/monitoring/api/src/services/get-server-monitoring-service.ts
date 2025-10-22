@@ -19,14 +19,6 @@ export async function getServerMonitoringService() {
   }
 
   switch (MONITORING_PROVIDER) {
-    case InstrumentationProvider.Baselime: {
-      const { BaselimeServerMonitoringService } = await import(
-        '@kit/baselime/server'
-      );
-
-      return new BaselimeServerMonitoringService();
-    }
-
     case InstrumentationProvider.Sentry: {
       const { SentryServerMonitoringService } = await import(
         '@kit/sentry/server'

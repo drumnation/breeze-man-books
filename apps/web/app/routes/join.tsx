@@ -1,20 +1,23 @@
-import { Link, redirect } from 'react-router';
+import { Form, Link, redirect } from 'react-router';
 
 import { ArrowLeft } from 'lucide-react';
 
 import { AuthLayoutShell } from '@kit/auth/shared';
+import { CsrfTokenFormField, useCsrfToken } from '@kit/csrf/client';
 import { verifyCsrfToken } from '@kit/csrf/server';
+import { useSignOut } from '@kit/supabase/hooks/use-sign-out';
 import { MultiFactorAuthError, requireUser } from '@kit/supabase/require-user';
 import { getSupabaseServerAdminClient } from '@kit/supabase/server-admin-client';
 import { getSupabaseServerClient } from '@kit/supabase/server-client';
 import { acceptInvitationAction } from '@kit/team-accounts/actions';
 import { createTeamAccountsApi } from '@kit/team-accounts/api';
-import { AcceptInvitationContainer } from '@kit/team-accounts/components';
 import { Button } from '@kit/ui/button';
 import { Heading } from '@kit/ui/heading';
+import { Separator } from '@kit/ui/separator';
 import { Trans } from '@kit/ui/trans';
 
 import { AppLogo } from '~/components/app-logo';
+import authConfig from '~/config/auth.config';
 import pathsConfig from '~/config/paths.config';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import type { Route } from '~/types/app/routes/+types/join';
@@ -28,7 +31,9 @@ export const meta = ({ data }: Route.MetaArgs) => {
 };
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
-  const token = new URL(request.url).searchParams.get('invite_token');
+  const searchParams = new URL(request.url).searchParams;
+  const token = searchParams.get('invite_token');
+  const linkType = searchParams.get('type');
 
   // no token, redirect to 404
   if (!token) {
@@ -107,6 +112,25 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     invitation.account.slug,
   );
 
+  // Determine if we should show the account setup step (Step 2)
+  // Decision logic:
+  // 1. Only show for new accounts (linkType === 'invite')
+  // 2. Only if we have auth options available (password OR OAuth)
+  // 3. Users can always skip and set up auth later in account settings
+  const supportsPasswordSignUp = authConfig.providers.password;
+  const supportsOAuthProviders = authConfig.providers.oAuth.length > 0;
+  const isNewAccount = linkType === 'invite';
+
+  const shouldSetupAccount =
+    isNewAccount && (supportsPasswordSignUp || supportsOAuthProviders);
+
+  // Determine redirect destination after joining:
+  // - If shouldSetupAccount: redirect to /identities with next param (Step 2)
+  // - Otherwise: redirect directly to team home (skip Step 2)
+  const nextPath = shouldSetupAccount
+    ? `/identities?next=${encodeURIComponent(accountHome)}`
+    : accountHome;
+
   const email = auth.data.email ?? '';
   const i18n = await createI18nServerInstance(request);
   const title = i18n.t('teams:joinTeamAccount');
@@ -117,13 +141,12 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
     token,
     invitation,
     signOutNext,
-    accountHome,
+    nextPath,
   };
 };
 
 export default function JoinTeamAccountPage(props: Route.ComponentProps) {
-  const { invitation, email, accountHome, signOutNext, token } =
-    props.loaderData;
+  const { invitation, email, nextPath, signOutNext, token } = props.loaderData;
 
   // the invitation is not found or expired
   if (!invitation) {
@@ -136,16 +159,140 @@ export default function JoinTeamAccountPage(props: Route.ComponentProps) {
 
   return (
     <AuthLayoutShell Logo={AppLogo}>
-      <AcceptInvitationContainer
-        email={email}
-        inviteToken={token}
-        invitation={invitation}
-        paths={{
-          signOutNext,
-          accountHome,
-        }}
-      />
+      <div className={'flex w-full justify-center'}>
+        <JoinTeamStep
+          email={email}
+          inviteToken={token}
+          invitation={invitation}
+          signOutNext={signOutNext}
+          nextPath={nextPath}
+        />
+      </div>
     </AuthLayoutShell>
+  );
+}
+
+/**
+ * @name JoinTeamStep
+ * @description Step 1 of the join flow - displays team info and join button.
+ * Uses standard form submission which redirects to either:
+ * - /identities (if shouldSetupAccount is true)
+ * - Team home page (if shouldSetupAccount is false)
+ */
+function JoinTeamStep(props: {
+  inviteToken: string;
+  email: string;
+  invitation: {
+    id: string;
+    account: {
+      name: string;
+      id: string;
+      picture_url: string | null;
+    };
+  };
+  signOutNext: string;
+  nextPath: string;
+}) {
+  const csrfToken = useCsrfToken();
+
+  return (
+    <div className={'flex w-full flex-col space-y-4'}>
+      <div
+        className={
+          'animate-in fade-in flex w-full max-w-md flex-col items-center space-y-4 duration-300'
+        }
+        data-test="join-step-one"
+      >
+        <div className={'flex flex-col items-center space-y-2'}>
+          <Heading className={'text-center'} level={4}>
+            <Trans
+              i18nKey={'teams:acceptInvitationHeading'}
+              values={{
+                accountName: props.invitation.account.name,
+              }}
+            />
+          </Heading>
+
+          {props.invitation.account.picture_url && (
+            <img
+              alt={`Logo`}
+              src={props.invitation.account.picture_url}
+              width={64}
+              height={64}
+              className={'rounded-lg object-cover'}
+            />
+          )}
+
+          <div className={'text-muted-foreground text-center text-sm'}>
+            <Trans
+              i18nKey={'teams:acceptInvitationDescription'}
+              values={{
+                accountName: props.invitation.account.name,
+              }}
+            />
+          </div>
+        </div>
+
+        <div className={'flex w-full flex-col space-y-4'}>
+          <Form
+            method={'POST'}
+            data-test={'join-team-form'}
+            className={'w-full'}
+          >
+            <input
+              type="hidden"
+              name={'inviteToken'}
+              value={props.inviteToken}
+            />
+
+            <CsrfTokenFormField value={csrfToken} />
+
+            <input type={'hidden'} name={'nextPath'} value={props.nextPath} />
+
+            <Button
+              type={'submit'}
+              className={'w-full transition-all'}
+              data-test="join-team-button"
+            >
+              <Trans
+                i18nKey={'teams:continueAs'}
+                values={{
+                  accountName: props.invitation.account.name,
+                  email: props.email,
+                }}
+              />
+            </Button>
+          </Form>
+
+          <Separator />
+        </div>
+      </div>
+
+      <div className={'flex w-full flex-col items-center space-y-2'}>
+        <SignOutButton nextPath={props.signOutNext} />
+
+        <span className={'text-muted-foreground text-center text-xs'}>
+          <Trans i18nKey={'teams:signInWithDifferentAccountDescription'} />
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function SignOutButton(props: { nextPath: string }) {
+  const signOut = useSignOut();
+
+  return (
+    <Button
+      data-test="sign-out-button"
+      variant={'ghost'}
+      onClick={async () => {
+        await signOut.mutateAsync();
+        window.location.assign(props.nextPath);
+      }}
+    >
+      <Trans i18nKey={'teams:signInWithDifferentAccount'} />
+    </Button>
   );
 }
 

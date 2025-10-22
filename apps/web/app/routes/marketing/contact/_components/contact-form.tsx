@@ -1,5 +1,3 @@
-import { useEffect, useState } from 'react';
-
 import { useFetcher } from 'react-router';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -22,11 +20,6 @@ import { Trans } from '@kit/ui/trans';
 import { ContactEmailSchema } from '../_lib/contact-email.schema';
 
 export function ContactForm() {
-  const [state, setState] = useState({
-    success: false,
-    error: false,
-  });
-
   const form = useForm({
     resolver: zodResolver(ContactEmailSchema),
     defaultValues: {
@@ -41,19 +34,14 @@ export function ContactForm() {
   }>();
 
   const pending = fetcher.state === 'submitting';
+  const error = fetcher.data && !fetcher.data.success;
+  const success = fetcher.data?.success;
 
-  useEffect(() => {
-    if (fetcher.data) {
-      const success = fetcher.data.success;
-      setState({ success, error: !success });
-    }
-  }, [fetcher.data]);
-
-  if (state.success) {
+  if (success) {
     return <SuccessAlert />;
   }
 
-  if (state.error) {
+  if (error) {
     return <ErrorAlert />;
   }
 

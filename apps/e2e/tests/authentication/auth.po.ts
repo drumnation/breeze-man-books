@@ -75,7 +75,9 @@ export class AuthPageObject {
       const res = await this.mailbox.visitMailbox(email, params);
 
       expect(res).not.toBeNull();
-    }).toPass();
+    }).toPass({
+      timeout: 5_000,
+    });
   }
 
   createRandomEmail() {
@@ -105,11 +107,14 @@ export class AuthPageObject {
   }
 
   async updatePassword(password: string) {
-    await this.page.waitForTimeout(100);
-    await this.page.fill('[name="password"]', password);
-    await this.page.waitForTimeout(100);
-    await this.page.fill('[name="repeatPassword"]', password);
-    await this.page.waitForTimeout(100);
-    await this.page.click('[type="submit"]');
+    await this.page.waitForTimeout(250);
+
+    expect(async () => {
+      await this.page.fill('[name="password"]', password);
+      await this.page.fill('[name="repeatPassword"]', password);
+
+      await this.page.click('[type="submit"]');
+      await this.page.waitForTimeout(500);
+    }).toPass();
   }
 }

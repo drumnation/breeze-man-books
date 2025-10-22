@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { useQuery } from '@tanstack/react-query';
 
@@ -37,9 +37,9 @@ export function VersionUpdater(props: { intervalTimeInSecond?: number }) {
   const [dismissed, setDismissed] = useState(false);
   const [showDialog, setShowDialog] = useState<boolean>(false);
 
-  useEffect(() => {
+  if (data?.didChange) {
     setShowDialog(data?.didChange ?? false);
-  }, [data?.didChange]);
+  }
 
   if (!data?.didChange || dismissed) {
     return null;

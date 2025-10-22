@@ -1,4 +1,8 @@
-import type { JwtPayload, SupabaseClient } from '@supabase/supabase-js';
+import type {
+  AMREntry,
+  JwtPayload,
+  SupabaseClient,
+} from '@supabase/supabase-js';
 
 import { checkRequiresMultiFactorAuthentication } from './check-requires-mfa';
 
@@ -23,6 +27,7 @@ type UserClaims = {
   aal: `aal1` | `aal2`;
   session_id: string;
   is_anonymous: boolean;
+  amr: AMREntry[];
 };
 
 /**

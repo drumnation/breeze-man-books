@@ -1,5 +1,3 @@
-import { useEffect, useState } from 'react';
-
 import { useFetcher } from 'react-router';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -39,11 +37,6 @@ export function AdminImpersonateUserDialog(
     userId: string;
   }>,
 ) {
-  const [tokens, setTokens] = useState<{
-    accessToken: string;
-    refreshToken: string;
-  }>();
-
   const csrfToken = useCsrfToken();
 
   const form = useForm({
@@ -68,11 +61,7 @@ export function AdminImpersonateUserDialog(
     refreshToken: string;
   }>();
 
-  useEffect(() => {
-    if (fetcher.data) {
-      setTokens(fetcher.data);
-    }
-  }, [fetcher.data]);
+  const tokens = fetcher.data;
 
   if (tokens) {
     return (

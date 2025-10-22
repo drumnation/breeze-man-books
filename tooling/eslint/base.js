@@ -3,10 +3,7 @@ import turbo from 'eslint-config-turbo';
 import { defineConfig } from 'eslint/config';
 import tsEsLint from 'typescript-eslint';
 
-import reactConfig, {
-  plugins as reactPlugins,
-  pluginsExtends as reactPluginsExtends,
-} from './react.js';
+import reactConfig from './react.js';
 
 export default defineConfig(
   eslint.configs.recommended,
@@ -14,7 +11,6 @@ export default defineConfig(
   ...reactConfig,
   {
     plugins: {
-      ...reactPlugins,
       turbo,
     },
     settings: {
@@ -22,7 +18,6 @@ export default defineConfig(
         version: '19.0',
       },
     },
-    extends: [...reactPluginsExtends],
   },
   {
     rules: {

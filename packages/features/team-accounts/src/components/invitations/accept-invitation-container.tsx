@@ -25,7 +25,7 @@ export function AcceptInvitationContainer(props: {
 
   paths: {
     signOutNext: string;
-    accountHome: string;
+    nextPath: string;
   };
 }) {
   const { state } = useNavigation();
@@ -74,7 +74,7 @@ export function AcceptInvitationContainer(props: {
           <input
             type={'hidden'}
             name={'nextPath'}
-            value={props.paths.accountHome}
+            value={props.paths.nextPath}
           />
 
           <Button type={'submit'} className={'w-full'} disabled={pending}>

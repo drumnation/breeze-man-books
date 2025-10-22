@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 import { useFetcher } from 'react-router';
 
@@ -66,7 +66,7 @@ export const UpdateMemberRoleDialog: React.FC<{
         <RolesDataProvider maxRoleHierarchy={userRoleHierarchy}>
           {(data) => (
             <UpdateMemberForm
-              setIsOpen={setIsOpen}
+              onSuccess={() => setIsOpen(false)}
               userId={userId}
               teamAccountId={teamAccountId}
               userRole={userRole}
@@ -83,16 +83,15 @@ function UpdateMemberForm({
   userId,
   userRole,
   teamAccountId,
-  setIsOpen,
+  onSuccess,
   roles,
 }: React.PropsWithChildren<{
   userId: string;
   userRole: Role;
   teamAccountId: string;
-  setIsOpen: (isOpen: boolean) => void;
+  onSuccess: () => void;
   roles: Role[];
 }>) {
-  const [error, setError] = useState<boolean>();
   const { t } = useTranslation('teams');
 
   const csrfToken = useCsrfToken();
@@ -101,17 +100,14 @@ function UpdateMemberForm({
     success: boolean;
   }>();
 
+  const error = fetcher.data && !fetcher.data.success;
   const pending = fetcher.state === 'submitting';
 
   useEffect(() => {
-    if (fetcher.data) {
-      if (fetcher.data.success) {
-        setIsOpen(false);
-      } else {
-        setError(true);
-      }
+    if (fetcher.data?.success) {
+      onSuccess();
     }
-  }, [fetcher.data, setIsOpen]);
+  }, [fetcher.data, onSuccess]);
 
   const onSubmit = ({ role }: { role: Role }) => {
     return fetcher.submit(

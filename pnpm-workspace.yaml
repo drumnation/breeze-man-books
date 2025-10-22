@@ -3,6 +3,12 @@ packages:
   - packages/**
   - tooling/*
 
+catalog:
+  '@supabase/supabase-js': 2.76.1
+  '@types/node': 24.9.1
+  '@types/react': 19.2.2
+  supabase: 2.53.6
+
 onlyBuiltDependencies:
   - '@tailwindcss/oxide'
   - '@sentry/cli'

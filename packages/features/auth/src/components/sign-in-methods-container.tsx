@@ -23,6 +23,8 @@ export function SignInMethodsContainer(props: {
     magicLink: boolean;
     oAuth: Provider[];
   };
+
+  captchaSiteKey?: string;
 }) {
   const navigate = useNavigate();
 
@@ -37,13 +39,17 @@ export function SignInMethodsContainer(props: {
   return (
     <>
       <If condition={props.providers.password}>
-        <PasswordSignInContainer onSignIn={onSignIn} />
+        <PasswordSignInContainer
+          onSignIn={onSignIn}
+          captchaSiteKey={props.captchaSiteKey}
+        />
       </If>
 
       <If condition={props.providers.magicLink}>
         <MagicLinkAuthContainer
           shouldCreateUser={false}
           redirectUrl={redirectUrl}
+          captchaSiteKey={props.captchaSiteKey}
         />
       </If>
 

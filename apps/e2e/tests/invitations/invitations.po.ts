@@ -130,9 +130,13 @@ export class InvitationsPageObject {
   async acceptInvitation() {
     console.log('Accepting invitation...');
 
-    const click = this.page
-      .locator('[data-test="join-team-form"] button[type="submit"]')
-      .click();
+    await this.page.waitForTimeout(250);
+
+    const joinButton = this.page.locator(
+      '[data-test="join-team-form"] button[type="submit"]',
+    );
+
+    await expect(joinButton).toBeVisible();
 
     const response = this.page.waitForResponse((response) => {
       return (
@@ -141,7 +145,25 @@ export class InvitationsPageObject {
       );
     });
 
-    await Promise.all([click, response]);
+    await Promise.all([joinButton.click(), response]);
+
+    await this.page.waitForTimeout(250);
+
+    // skip authentication setup
+    const skipIdentitiesButton = this.page.locator(
+      '[data-test="skip-identities-button"]',
+    );
+
+    if (
+      await skipIdentitiesButton.isVisible({
+        timeout: 1000,
+      })
+    ) {
+      await skipIdentitiesButton.click();
+    }
+
+    // wait for redirect to account home
+    await this.page.waitForURL(new RegExp('/home/[a-z0-9-]+'));
   }
 
   private getInviteForm() {

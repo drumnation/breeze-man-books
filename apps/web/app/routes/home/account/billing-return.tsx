@@ -69,7 +69,7 @@ export default function ReturnCheckoutSessionPage(props: Route.ComponentProps) {
 
   return (
     <>
-      <div className={'fixed left-0 top-48 z-50 mx-auto w-full'}>
+      <div className={'fixed top-48 left-0 z-50 mx-auto w-full'}>
         <BillingSessionStatus
           redirectPath={'../'}
           customerEmail={customerEmail ?? ''}
@@ -85,7 +85,7 @@ function BlurryBackdrop() {
   return (
     <div
       className={
-        'bg-background/30 fixed left-0 top-0 w-full backdrop-blur-sm' +
+        'bg-background/30 fixed top-0 left-0 w-full backdrop-blur-sm' +
         ' !m-0 h-full'
       }
     />

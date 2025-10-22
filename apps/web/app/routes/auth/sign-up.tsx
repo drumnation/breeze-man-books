@@ -51,6 +51,7 @@ export default function SignUpPage() {
         providers={authConfig.providers}
         displayTermsCheckbox={authConfig.displayTermsCheckbox}
         paths={paths}
+        captchaSiteKey={authConfig.captchaTokenSiteKey}
       />
 
       <div className={'flex justify-center'}>

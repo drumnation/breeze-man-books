@@ -64,8 +64,16 @@ export class AccountPageObject {
   }
 
   async deleteAccount(email: string) {
-    // Click the delete account button to open the modal
-    await this.page.click('[data-test="delete-account-button"]');
+    await expect(async () => {
+      // Click the delete account button to open the modal
+      const button = this.page.locator('[data-test="delete-account-button"]');
+
+      await expect(button).toBeVisible();
+
+      await button.click();
+    }).toPass({
+      timeout: 5_000,
+    });
 
     // Complete the OTP verification process
     await this.otp.completeOtpVerification(email);

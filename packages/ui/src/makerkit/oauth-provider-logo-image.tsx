@@ -1,4 +1,4 @@
-import { AtSign, Phone } from 'lucide-react';
+import { AtSign, Mail, Phone } from 'lucide-react';
 
 const DEFAULT_IMAGE_SIZE = 18;
 
@@ -28,6 +28,7 @@ export const OauthProviderLogoImage: React.FC<{
 function getOAuthProviderLogos(): Record<string, string | React.ReactNode> {
   return {
     password: <AtSign className={'s-[18px]'} />,
+    email: <Mail className={'s-[18px]'} />,
     phone: <Phone className={'s-[18px]'} />,
     google: '/images/oauth/google.webp',
     facebook: '/images/oauth/facebook.webp',

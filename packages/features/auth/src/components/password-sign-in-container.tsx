@@ -6,15 +6,17 @@ import type { z } from 'zod';
 
 import { useSignInWithEmailPassword } from '@kit/supabase/hooks/use-sign-in-with-email-password';
 
-import { useCaptchaToken } from '../captcha/client';
+import { useCaptcha } from '../captcha/client';
 import type { PasswordSignInSchema } from '../schemas/password-sign-in.schema';
 import { AuthErrorAlert } from './auth-error-alert';
 import { PasswordSignInForm } from './password-sign-in-form';
 
 export const PasswordSignInContainer: React.FC<{
   onSignIn?: (userId?: string) => unknown;
-}> = ({ onSignIn }) => {
-  const { captchaToken, resetCaptchaToken } = useCaptchaToken();
+  captchaSiteKey?: string;
+}> = ({ onSignIn, captchaSiteKey }) => {
+  const captcha = useCaptcha({ siteKey: captchaSiteKey });
+
   const signInMutation = useSignInWithEmailPassword();
   const isLoading = signInMutation.isPending;
   const isRedirecting = signInMutation.isSuccess;
@@ -24,7 +26,7 @@ export const PasswordSignInContainer: React.FC<{
       try {
         const data = await signInMutation.mutateAsync({
           ...credentials,
-          options: { captchaToken },
+          options: { captchaToken: captcha.token },
         });
 
         if (onSignIn) {
@@ -35,15 +37,17 @@ export const PasswordSignInContainer: React.FC<{
       } catch {
         // wrong credentials, do nothing
       } finally {
-        resetCaptchaToken();
+        captcha.reset();
       }
     },
-    [captchaToken, onSignIn, resetCaptchaToken, signInMutation],
+    [captcha, onSignIn, signInMutation],
   );
 
   return (
     <>
       <AuthErrorAlert error={signInMutation.error} />
+
+      {captcha.field}
 
       <PasswordSignInForm
         onSubmit={onSubmit}

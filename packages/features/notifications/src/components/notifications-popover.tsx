@@ -54,64 +54,6 @@ export function NotificationsPopover(params: {
     realtime: params.realtime,
   });
 
-  const timeAgo = (createdAt: string) => {
-    const date = new Date(createdAt);
-
-    let time: number;
-
-    const daysAgo = Math.floor(
-      (new Date().getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
-    );
-
-    const formatter = new Intl.RelativeTimeFormat(i18n.language, {
-      numeric: 'auto',
-    });
-
-    if (daysAgo < 1) {
-      time = Math.floor((new Date().getTime() - date.getTime()) / (1000 * 60));
-
-      if (time < 5) {
-        return t('common:justNow');
-      }
-
-      if (time < 60) {
-        return formatter.format(-time, 'minute');
-      }
-
-      const hours = Math.floor(time / 60);
-
-      return formatter.format(-hours, 'hour');
-    }
-
-    const unit = (() => {
-      const minutesAgo = Math.floor(
-        (new Date().getTime() - date.getTime()) / (1000 * 60),
-      );
-
-      if (minutesAgo <= 60) {
-        return 'minute';
-      }
-
-      if (daysAgo <= 1) {
-        return 'hour';
-      }
-
-      if (daysAgo <= 30) {
-        return 'day';
-      }
-
-      if (daysAgo <= 365) {
-        return 'month';
-      }
-
-      return 'year';
-    })();
-
-    const text = formatter.format(-daysAgo, unit);
-
-    return text.slice(0, 1).toUpperCase() + text.slice(1);
-  };
-
   useEffect(() => {
     return () => {
       setNotifications([]);
@@ -126,7 +68,7 @@ export function NotificationsPopover(params: {
 
           <span
             className={cn(
-              `fade-in animate-in zoom-in absolute right-1 top-1 mt-0 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[0.65rem] text-white`,
+              `fade-in animate-in zoom-in absolute top-1 right-1 mt-0 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[0.65rem] text-white`,
               {
                 hidden: !notifications.length,
               },
@@ -186,7 +128,7 @@ export function NotificationsPopover(params: {
               <div
                 key={notification.id.toString()}
                 className={cn(
-                  'min-h-18 flex flex-col items-start justify-center space-y-0.5 px-3 py-2',
+                  'flex min-h-18 flex-col items-start justify-center space-y-0.5 px-3 py-2',
                 )}
                 onClick={() => {
                   if (params.onClick) {
@@ -214,7 +156,7 @@ export function NotificationsPopover(params: {
                       </div>
 
                       <span className={'text-muted-foreground text-xs'}>
-                        {timeAgo(notification.created_at)}
+                        {timeAgo(notification.created_at, i18n.language, t)}
                       </span>
                     </div>
                   </div>
@@ -246,4 +188,66 @@ export function NotificationsPopover(params: {
       </PopoverContent>
     </Popover>
   );
+}
+
+function timeAgo(
+  createdAt: string,
+  language: string,
+  t: (key: string) => string,
+) {
+  const date = new Date(createdAt);
+
+  let time: number;
+
+  const daysAgo = Math.floor(
+    (new Date().getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
+  );
+
+  const formatter = new Intl.RelativeTimeFormat(language, {
+    numeric: 'auto',
+  });
+
+  if (daysAgo < 1) {
+    time = Math.floor((new Date().getTime() - date.getTime()) / (1000 * 60));
+
+    if (time < 5) {
+      return t('common:justNow');
+    }
+
+    if (time < 60) {
+      return formatter.format(-time, 'minute');
+    }
+
+    const hours = Math.floor(time / 60);
+
+    return formatter.format(-hours, 'hour');
+  }
+
+  const unit = (() => {
+    const minutesAgo = Math.floor(
+      (new Date().getTime() - date.getTime()) / (1000 * 60),
+    );
+
+    if (minutesAgo <= 60) {
+      return 'minute';
+    }
+
+    if (daysAgo <= 1) {
+      return 'hour';
+    }
+
+    if (daysAgo <= 30) {
+      return 'day';
+    }
+
+    if (daysAgo <= 365) {
+      return 'month';
+    }
+
+    return 'year';
+  })();
+
+  const text = formatter.format(-daysAgo, unit);
+
+  return text.slice(0, 1).toUpperCase() + text.slice(1);
 }

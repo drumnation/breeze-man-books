@@ -682,7 +682,7 @@ export function VisitorsChart() {
       <CardFooter>
         <div className="flex w-full items-start gap-2 text-sm">
           <div className="grid gap-2">
-            <div className="flex items-center gap-2 font-medium leading-none">
+            <div className="flex items-center gap-2 leading-none font-medium">
               Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
             </div>
             <div className="text-muted-foreground flex items-center gap-2 leading-none">
@@ -836,13 +836,13 @@ export function PageViewsChart() {
               <button
                 key={chart}
                 data-active={activeChart === chart}
-                className="data-[active=true]:bg-muted/50 relative z-30 flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
+                className="data-[active=true]:bg-muted/50 relative z-30 flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l sm:border-t-0 sm:border-l sm:px-8 sm:py-6"
                 onClick={() => setActiveChart(chart)}
               >
                 <span className="text-muted-foreground text-xs">
                   {chartConfig[chart].label}
                 </span>
-                <span className="text-lg font-bold leading-none sm:text-3xl">
+                <span className="text-lg leading-none font-bold sm:text-3xl">
                   {total[key as keyof typeof total].toLocaleString()}
                 </span>
               </button>

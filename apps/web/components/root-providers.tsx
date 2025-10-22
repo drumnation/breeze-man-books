@@ -2,7 +2,6 @@ import { Suspense, useMemo } from 'react';
 
 import { ThemeProvider } from 'next-themes';
 
-import { CaptchaProvider, CaptchaTokenSetter } from '@kit/auth/captcha/client';
 import { I18nProvider } from '@kit/i18n/provider';
 import { MonitoringProvider } from '@kit/monitoring/components';
 import { AppEventsProvider } from '@kit/shared/events';
@@ -14,14 +13,11 @@ import { VersionUpdater } from '@kit/ui/version-updater';
 
 import { AnalyticsProvider } from '~/components/analytics-provider';
 import { AuthProvider } from '~/components/auth-provider';
-import authConfig from '~/config/auth.config';
 import featuresFlagConfig from '~/config/feature-flags.config';
 import { i18nResolver } from '~/lib/i18n/i18n.resolver';
 import { getI18nSettings } from '~/lib/i18n/i18n.settings';
 
 import { ReactQueryProvider } from './react-query-provider';
-
-const captchaSiteKey = authConfig.captchaTokenSiteKey;
 
 type Theme = 'light' | 'dark' | 'system';
 
@@ -49,25 +45,21 @@ export function RootProviders(
           <MonitoringProvider>
             <AppEventsProvider>
               <AnalyticsProvider>
-                <CaptchaProvider>
-                  <CaptchaTokenSetter siteKey={captchaSiteKey} />
+                <AuthProvider>
+                  <ThemeProvider
+                    attribute="class"
+                    enableSystem
+                    disableTransitionOnChange
+                    defaultTheme={props.theme}
+                    enableColorScheme={false}
+                  >
+                    {props.children}
+                  </ThemeProvider>
+                </AuthProvider>
 
-                  <AuthProvider>
-                    <ThemeProvider
-                      attribute="class"
-                      enableSystem
-                      disableTransitionOnChange
-                      defaultTheme={props.theme}
-                      enableColorScheme={false}
-                    >
-                      {props.children}
-                    </ThemeProvider>
-                  </AuthProvider>
-
-                  <If condition={featuresFlagConfig.enableVersionUpdater}>
-                    <VersionUpdater />
-                  </If>
-                </CaptchaProvider>{' '}
+                <If condition={featuresFlagConfig.enableVersionUpdater}>
+                  <VersionUpdater />
+                </If>
               </AnalyticsProvider>
             </AppEventsProvider>
           </MonitoringProvider>

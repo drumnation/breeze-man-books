@@ -10,7 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from '@kit/ui/alert';
 import { If } from '@kit/ui/if';
 import { Trans } from '@kit/ui/trans';
 
-import { useCaptchaToken } from '../captcha/client';
+import { useCaptcha } from '../captcha/client';
 import { AuthErrorAlert } from './auth-error-alert';
 import { PasswordSignUpForm } from './password-sign-up-form';
 
@@ -18,14 +18,16 @@ interface EmailPasswordSignUpContainerProps {
   onSignUp?: (userId?: string) => unknown;
   displayTermsCheckbox?: boolean;
   emailRedirectTo: string;
+  captchaSiteKey?: string;
 }
 
 export function EmailPasswordSignUpContainer({
   onSignUp,
   emailRedirectTo,
   displayTermsCheckbox,
+  captchaSiteKey,
 }: EmailPasswordSignUpContainerProps) {
-  const { captchaToken, resetCaptchaToken } = useCaptchaToken();
+  const captcha = useCaptcha({ siteKey: captchaSiteKey });
 
   const signUpMutation = useSignUpWithEmailAndPassword();
   const redirecting = useRef(false);
@@ -43,7 +45,7 @@ export function EmailPasswordSignUpContainer({
         const data = await signUpMutation.mutateAsync({
           ...credentials,
           emailRedirectTo,
-          captchaToken,
+          captchaToken: captcha.token,
         });
 
         appEvents.emit({
@@ -61,18 +63,10 @@ export function EmailPasswordSignUpContainer({
       } catch (error) {
         console.error(error);
       } finally {
-        resetCaptchaToken();
+        captcha.reset();
       }
     },
-    [
-      captchaToken,
-      emailRedirectTo,
-      loading,
-      onSignUp,
-      resetCaptchaToken,
-      signUpMutation,
-      appEvents,
-    ],
+    [captcha, emailRedirectTo, loading, onSignUp, signUpMutation, appEvents],
   );
 
   return (
@@ -83,6 +77,8 @@ export function EmailPasswordSignUpContainer({
 
       <If condition={!showVerifyEmailAlert}>
         <AuthErrorAlert error={signUpMutation.error} />
+
+        {captcha.field}
 
         <PasswordSignUpForm
           displayTermsCheckbox={displayTermsCheckbox}

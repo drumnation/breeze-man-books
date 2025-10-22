@@ -43,18 +43,12 @@ test.describe('Password Reset Flow', () => {
 
       await auth.updatePassword(newPassword);
 
-      await page
-        .locator('a', {
-          hasText: 'Back to Home Page',
-        })
-        .click();
-
       await page.waitForURL('/home');
     }).toPass();
 
-    await auth.signOut();
+    await page.context().clearCookies();
+    await page.reload();
 
-    await page.waitForURL('/');
     await page.goto('/auth/sign-in');
 
     await auth.signIn({
@@ -62,8 +56,6 @@ test.describe('Password Reset Flow', () => {
       password: newPassword,
     });
 
-    await page.waitForURL('/home', {
-      timeout: 2000,
-    });
+    await page.waitForURL('/home');
   });
 });

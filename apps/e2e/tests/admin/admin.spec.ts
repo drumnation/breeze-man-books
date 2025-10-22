@@ -129,6 +129,7 @@ test.describe('Admin', () => {
       await expect(page.getByText('User Banned')).toBeVisible();
 
       await page.context().clearCookies();
+      await page.reload();
 
       // Verify user can't log in
       await page.goto('/auth/sign-in');
@@ -170,6 +171,7 @@ test.describe('Admin', () => {
 
       // Log out
       await page.context().clearCookies();
+      await page.reload();
 
       // Verify user can log in again
       await page.goto('/auth/sign-in');
@@ -218,12 +220,12 @@ test.describe('Admin', () => {
       await expect(page).toHaveURL('/admin/accounts');
 
       // Log out
-      await page.context().clearCookies();
+      const auth = new AuthPageObject(page);
+      await auth.signOut();
+      await page.waitForURL('/');
 
       // Verify user can't log in
       await page.goto('/auth/sign-in');
-
-      const auth = new AuthPageObject(page);
 
       await auth.signIn({
         email: testUserEmail,
@@ -340,14 +342,12 @@ async function createUser(
 
   await auth.visitConfirmEmailLink(email);
 
-  await page.goto('/home');
-
   if (params.afterSignIn) {
     await params.afterSignIn();
   }
 
-  await auth.signOut();
-  await page.waitForURL('/');
+  await page.context().clearCookies();
+  await page.reload();
 
   return email;
 }

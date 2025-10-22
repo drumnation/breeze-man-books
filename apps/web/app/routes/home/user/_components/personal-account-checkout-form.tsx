@@ -1,5 +1,3 @@
-import { useEffect, useState } from 'react';
-
 import { useFetcher } from 'react-router';
 
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
@@ -20,36 +18,27 @@ import { Trans } from '@kit/ui/trans';
 
 import billingConfig from '~/config/billing.config';
 
+type FetcherData =
+  | {
+      checkoutToken: string;
+    }
+  | {
+      error: boolean;
+    };
+
 export function PersonalAccountCheckoutForm(props: {
   customerId: string | null | undefined;
 }) {
   const appEvents = useAppEvents();
-  const [error, setError] = useState(false);
+  const fetcher = useFetcher<FetcherData>();
 
-  const [checkoutToken, setCheckoutToken] = useState<string | undefined>(
-    undefined,
-  );
+  const error =
+    fetcher.data && 'error' in fetcher.data ? fetcher.data.error : undefined;
 
-  const fetcher = useFetcher<
-    | {
-        checkoutToken: string;
-      }
-    | {
-        error: boolean;
-      }
-  >();
-
-  useEffect(() => {
-    if (fetcher.data) {
-      if ('error' in fetcher.data) {
-        setError(true);
-      }
-
-      if ('checkoutToken' in fetcher.data) {
-        setCheckoutToken(fetcher.data.checkoutToken);
-      }
-    }
-  }, [fetcher.data]);
+  const checkoutToken =
+    fetcher.data && 'checkoutToken' in fetcher.data
+      ? fetcher.data.checkoutToken
+      : undefined;
 
   // only allow trial if the user is not already a customer
   const canStartTrial = !props.customerId;
@@ -61,7 +50,11 @@ export function PersonalAccountCheckoutForm(props: {
       <EmbeddedCheckout
         checkoutToken={checkoutToken}
         provider={billingConfig.provider}
-        onClose={() => setCheckoutToken(undefined)}
+        onClose={() =>
+          fetcher.unstable_reset({
+            reason: 'Checkout closed',
+          })
+        }
       />
     );
   }
