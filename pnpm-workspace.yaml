@@ -4,10 +4,10 @@ packages:
   - tooling/*
 
 catalog:
-  '@supabase/supabase-js': 2.76.1
-  '@types/node': 24.9.1
+  '@supabase/supabase-js': 2.78.0
+  '@types/node': 24.9.2
   '@types/react': 19.2.2
-  supabase: 2.53.6
+  supabase: 2.54.11
 
 onlyBuiltDependencies:
   - '@tailwindcss/oxide'
