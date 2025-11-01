@@ -1,6 +1,6 @@
 import { data, redirect } from 'react-router';
 
-import { Cms, ContentRenderer, createCmsClient } from '@kit/cms';
+import { ContentRenderer, createCmsClient } from '@kit/cms';
 import { If } from '@kit/ui/if';
 import { Separator } from '@kit/ui/separator';
 import { cn } from '@kit/ui/utils';
@@ -16,11 +16,11 @@ const getPageBySlug = async (slug: string) => {
 };
 
 export const meta = (args: Route.MetaArgs) => {
-  if (!args.data) {
+  if (!args.loaderData) {
     return [];
   }
 
-  const { title, description } = args.data.page;
+  const { title, description } = args.loaderData.page;
 
   return [
     {
@@ -47,28 +47,42 @@ export default function DocumentationPage(props: Route.ComponentProps) {
   const description = page?.description ?? '';
 
   return (
-    <div className={'flex flex-1 flex-col'}>
-      <article className={cn('gap-y-12 overflow-y-auto px-4')}>
-        <section
-          className={'flex flex-col gap-y-1 border-b border-dashed pb-4'}
-        >
-          <h1 className={'text-foreground text-3xl'}>{page.title}</h1>
+    <div className={'flex flex-1 flex-col gap-y-4 overflow-y-hidden'}>
+      <div className={'flex size-full overflow-y-hidden'}>
+        <div className="relative size-full">
+          <article
+            className={cn(
+              'absolute size-full w-full gap-y-12 overflow-y-auto pt-4 pb-36',
+            )}
+          >
+            <section
+              className={'flex flex-col gap-y-1 border-b border-dashed pb-4'}
+            >
+              <h1
+                className={
+                  'text-foreground text-3xl font-semibold tracking-tighter'
+                }
+              >
+                {page.title}
+              </h1>
 
-          <h2 className={'text-secondary-foreground/80 text-lg'}>
-            {description}
-          </h2>
-        </section>
+              <h2 className={'text-secondary-foreground/80 text-lg'}>
+                {description}
+              </h2>
+            </section>
 
-        <div className={'markdoc'}>
-          <ContentRenderer content={page.content} />
+            <div className={'markdoc'}>
+              <ContentRenderer content={page.content} />
+            </div>
+          </article>
         </div>
+      </div>
 
-        <If condition={page.children.length > 0}>
-          <Separator />
+      <If condition={page.children.length > 0}>
+        <Separator />
 
-          <DocsCards cards={(page.children ?? []) as Cms.ContentItem[]} />
-        </If>
-      </article>
+        <DocsCards cards={page.children ?? []} />
+      </If>
     </div>
   );
 }

@@ -32,6 +32,8 @@ const marketingLayout = layout('routes/marketing/layout.tsx', [
   route('faq', 'routes/marketing/faq.tsx'),
   route('blog', 'routes/marketing/blog/index.tsx'),
   route('blog/:slug', 'routes/marketing/blog/$slug.tsx'),
+  route('changelog', 'routes/marketing/changelog/index.tsx'),
+  route('changelog/:slug', 'routes/marketing/changelog/$slug.tsx'),
   route('cookie-policy', 'routes/marketing/cookie-policy.tsx'),
   layout('routes/marketing/docs/layout.tsx', [
     route('docs', 'routes/marketing/docs/index.tsx'),

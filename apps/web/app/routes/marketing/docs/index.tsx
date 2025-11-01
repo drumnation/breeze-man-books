@@ -18,17 +18,18 @@ export const loader = async (args: Route.LoaderArgs) => {
   };
 };
 
-export const meta = ({ data }: Route.MetaArgs) => {
+export const meta = ({ loaderData }: Route.MetaArgs) => {
   return [
     {
-      title: data?.title,
-      description: data?.description,
+      title: loaderData?.title,
+      description: loaderData?.description,
     },
   ];
 };
 
 export default function DocsPage(props: Route.ComponentProps) {
   const { title, description } = props.loaderData;
+
   const data = useRouteLoaderData<typeof docsLoader>(
     'routes/marketing/docs/layout',
   );

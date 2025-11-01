@@ -24,11 +24,32 @@ export default function DocsLayout(props: Route.ComponentProps) {
   const { pages } = props.loaderData;
 
   return (
-    <SidebarProvider className={'container flex'}>
-      <DocsNavigation pages={pages as Cms.ContentItem[]} />
+    <div className={'container h-[calc(100vh-56px)] overflow-y-hidden'}>
+      <SidebarProvider
+        className="lg:gap-x-6"
+        style={{ '--sidebar-width': '17em' } as React.CSSProperties}
+      >
+        <HideFooterStyles />
 
-      <Outlet />
-    </SidebarProvider>
+        <DocsNavigation pages={pages} />
+
+        <Outlet />
+      </SidebarProvider>
+    </div>
+  );
+}
+
+function HideFooterStyles() {
+  return (
+    <style
+      dangerouslySetInnerHTML={{
+        __html: `
+          .site-footer {
+            display: none;
+          }
+        `,
+      }}
+    />
   );
 }
 
