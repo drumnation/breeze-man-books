@@ -84,8 +84,6 @@ export function PasswordResetRequestContainer(params: {
 
               <AuthErrorAlert error={error} />
 
-              {captcha.field}
-
               <FormField
                 name={'email'}
                 render={({ field }) => (
@@ -113,6 +111,8 @@ export function PasswordResetRequestContainer(params: {
               </Button>
             </div>
           </form>
+
+          {captcha.field}
         </Form>
       </If>
     </>

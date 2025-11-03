@@ -75,12 +75,12 @@ export function ResendAuthLinkForm(props: { redirectPath?: string }) {
           name={'email'}
         />
 
-        {captcha.field}
-
         <Button disabled={resendLink.isPending}>
           <Trans i18nKey={'auth:resendLink'} defaults={'Resend Link'} />
         </Button>
       </form>
+
+      {captcha.field}
     </Form>
   );
 }

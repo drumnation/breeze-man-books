@@ -78,13 +78,15 @@ export function EmailPasswordSignUpContainer({
       <If condition={!showVerifyEmailAlert}>
         <AuthErrorAlert error={signUpMutation.error} />
 
-        {captcha.field}
+        <div>
+          <PasswordSignUpForm
+            displayTermsCheckbox={displayTermsCheckbox}
+            onSubmit={onSignupRequested}
+            loading={loading}
+          />
 
-        <PasswordSignUpForm
-          displayTermsCheckbox={displayTermsCheckbox}
-          onSubmit={onSignupRequested}
-          loading={loading}
-        />
+          {captcha.field}
+        </div>
       </If>
     </>
   );

@@ -3,7 +3,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowRight } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { useTranslation } from 'react-i18next';
 
 import { Button } from '@kit/ui/button';
 import {
@@ -16,10 +15,11 @@ import {
   FormMessage,
 } from '@kit/ui/form';
 import { If } from '@kit/ui/if';
-import { Input } from '@kit/ui/input';
 import { Trans } from '@kit/ui/trans';
 
 import { PasswordSignUpSchema } from '../schemas/password-sign-up.schema';
+import { EmailInput } from './email-input';
+import { PasswordInput } from './password-input';
 import { TermsAndConditionsFormField } from './terms-and-conditions-form-field';
 
 export const PasswordSignUpForm: React.FC<{
@@ -31,8 +31,6 @@ export const PasswordSignUpForm: React.FC<{
   loading: boolean;
   displayTermsCheckbox?: boolean;
 }> = ({ onSubmit, loading, displayTermsCheckbox }) => {
-  const { t } = useTranslation();
-
   const form = useForm({
     resolver: zodResolver(PasswordSignUpSchema),
     defaultValues: {
@@ -53,18 +51,8 @@ export const PasswordSignUpForm: React.FC<{
           name={'email'}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>
-                <Trans i18nKey={'common:emailAddress'} />
-              </FormLabel>
-
               <FormControl>
-                <Input
-                  data-test={'email-input'}
-                  required
-                  type="email"
-                  placeholder={t('emailPlaceholder')}
-                  {...field}
-                />
+                <EmailInput {...field} />
               </FormControl>
 
               <FormMessage />
@@ -77,18 +65,8 @@ export const PasswordSignUpForm: React.FC<{
           name={'password'}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>
-                <Trans i18nKey={'common:password'} />
-              </FormLabel>
-
               <FormControl>
-                <Input
-                  required
-                  data-test={'password-input'}
-                  type="password"
-                  placeholder={''}
-                  {...field}
-                />
+                <PasswordInput {...field} />
               </FormControl>
 
               <FormMessage />
@@ -106,13 +84,7 @@ export const PasswordSignUpForm: React.FC<{
               </FormLabel>
 
               <FormControl>
-                <Input
-                  required
-                  data-test={'repeat-password-input'}
-                  type="password"
-                  placeholder={''}
-                  {...field}
-                />
+                <PasswordInput data-test="repeat-password-input" {...field} />
               </FormControl>
 
               <FormMessage />

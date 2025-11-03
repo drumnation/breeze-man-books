@@ -5,7 +5,6 @@ import { Link } from 'react-router';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowRight } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { useTranslation } from 'react-i18next';
 import type { z } from 'zod';
 
 import { Button } from '@kit/ui/button';
@@ -14,22 +13,20 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@kit/ui/form';
 import { If } from '@kit/ui/if';
-import { Input } from '@kit/ui/input';
 import { Trans } from '@kit/ui/trans';
 
 import { PasswordSignInSchema } from '../schemas/password-sign-in.schema';
+import { EmailInput } from './email-input';
+import { PasswordInput } from './password-input';
 
 export const PasswordSignInForm: React.FC<{
   onSubmit: (params: z.infer<typeof PasswordSignInSchema>) => unknown;
   loading: boolean;
   redirecting: boolean;
 }> = ({ onSubmit, loading = false, redirecting = false }) => {
-  const { t } = useTranslation('auth');
-
   const form = useForm<z.infer<typeof PasswordSignInSchema>>({
     resolver: zodResolver(PasswordSignInSchema),
     defaultValues: {
@@ -49,18 +46,8 @@ export const PasswordSignInForm: React.FC<{
           name={'email'}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>
-                <Trans i18nKey={'common:emailAddress'} />
-              </FormLabel>
-
               <FormControl>
-                <Input
-                  data-test={'email-input'}
-                  required
-                  type="email"
-                  placeholder={t('emailPlaceholder')}
-                  {...field}
-                />
+                <EmailInput {...field} />
               </FormControl>
 
               <FormMessage />
@@ -73,18 +60,8 @@ export const PasswordSignInForm: React.FC<{
           name={'password'}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>
-                <Trans i18nKey={'common:password'} />
-              </FormLabel>
-
               <FormControl>
-                <Input
-                  required
-                  data-test={'password-input'}
-                  type="password"
-                  placeholder={''}
-                  {...field}
-                />
+                <PasswordInput {...field} />
               </FormControl>
 
               <FormMessage />

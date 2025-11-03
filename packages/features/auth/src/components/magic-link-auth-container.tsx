@@ -16,14 +16,13 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@kit/ui/form';
 import { If } from '@kit/ui/if';
-import { Input } from '@kit/ui/input';
 import { Trans } from '@kit/ui/trans';
 
 import { useCaptcha } from '../captcha/client';
+import { EmailInput } from './email-input';
 import { TermsAndConditionsFormField } from './terms-and-conditions-form-field';
 
 export function MagicLinkAuthContainer({
@@ -98,24 +97,12 @@ export function MagicLinkAuthContainer({
           <ErrorAlert />
         </If>
 
-        {captcha.field}
-
         <div className={'flex flex-col space-y-4'}>
           <FormField
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  <Trans i18nKey={'common:emailAddress'} />
-                </FormLabel>
-
                 <FormControl>
-                  <Input
-                    data-test={'email-input'}
-                    required
-                    type="email"
-                    placeholder={t('auth:emailPlaceholder')}
-                    {...field}
-                  />
+                  <EmailInput {...field} />
                 </FormControl>
 
                 <FormMessage />
@@ -138,6 +125,8 @@ export function MagicLinkAuthContainer({
           </Button>
         </div>
       </form>
+
+      {captcha.field}
     </Form>
   );
 }

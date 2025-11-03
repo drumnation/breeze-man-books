@@ -15,16 +15,16 @@ import { Button } from '@kit/ui/button';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@kit/ui/form';
 import { Heading } from '@kit/ui/heading';
-import { Input } from '@kit/ui/input';
 import { Trans } from '@kit/ui/trans';
 
 import { PasswordResetSchema } from '../schemas/password-reset.schema';
+import { PasswordInput } from './password-input';
 
 export function UpdatePasswordForm(params: {
   redirectTo: string;
@@ -77,17 +77,8 @@ export function UpdatePasswordForm(params: {
               name={'password'}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    <Trans i18nKey={'common:password'} />
-                  </FormLabel>
-
                   <FormControl>
-                    <Input
-                      required
-                      type="password"
-                      autoComplete={'new-password'}
-                      {...field}
-                    />
+                    <PasswordInput {...field} autoComplete="new-password" />
                   </FormControl>
 
                   <FormMessage />
@@ -99,13 +90,13 @@ export function UpdatePasswordForm(params: {
               name={'repeatPassword'}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    <Trans i18nKey={'common:repeatPassword'} />
-                  </FormLabel>
-
                   <FormControl>
-                    <Input required type="password" {...field} />
+                    <PasswordInput {...field} />
                   </FormControl>
+
+                  <FormDescription>
+                    <Trans i18nKey={'auth:repeatPasswordHint'} />
+                  </FormDescription>
 
                   <FormMessage />
                 </FormItem>
