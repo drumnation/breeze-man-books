@@ -39,10 +39,14 @@ export const meta = () => {
 };
 
 export async function loader({ request }: Route.LoaderArgs) {
-  const { language } = await createI18nServerInstance(request);
-  const theme = await getTheme(request);
+  const [i18n, theme, csrfToken] = await Promise.all([
+    createI18nServerInstance(request),
+    getTheme(request),
+    csrfProtect(request),
+  ]);
+
+  const { language } = i18n;
   const className = getClassName(theme);
-  const csrfToken = await csrfProtect(request);
 
   return data(
     {
@@ -58,8 +62,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export default function App(props: Route.ComponentProps) {
-  const { loaderData } = props;
-  const { language, className, theme } = loaderData ?? {};
+  const { language, className, theme, csrfToken } = props.loaderData ?? {};
 
   return (
     <html lang={language} className={className}>
@@ -67,7 +70,7 @@ export default function App(props: Route.ComponentProps) {
         <RootHead />
         <Meta />
         <Links />
-        <CsrfTokenMeta csrf={loaderData.csrfToken} />
+        <CsrfTokenMeta csrf={csrfToken} />
       </head>
 
       <body>
@@ -86,7 +89,7 @@ function getClassName(theme?: string) {
   const dark = theme === 'dark';
   const light = !dark;
 
-  return cn('bg-background min-h-screen antialiased', {
+  return cn('bg-background min-h-screen overscroll-none antialiased', {
     dark,
     light,
   });
