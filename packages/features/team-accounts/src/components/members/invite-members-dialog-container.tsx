@@ -223,8 +223,8 @@ function InviteMembersForm({
                       name={emailInputName}
                       render={({ field }) => {
                         return (
-                          <FormItem>
-                            <FormControl>
+                          <FormItem className="size-full">
+                            <FormControl className="size-full">
                               <InputGroupInput
                                 data-test={'invite-email-input'}
                                 placeholder={t('emailPlaceholder')}

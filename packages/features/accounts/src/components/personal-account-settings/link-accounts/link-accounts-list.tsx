@@ -1,4 +1,6 @@
-import { Suspense, lazy, useState } from 'react';
+'use client';
+
+import { Suspense, useState } from 'react';
 
 import { useLocation } from 'react-router';
 
@@ -44,17 +46,8 @@ import { toast } from '@kit/ui/sonner';
 import { Spinner } from '@kit/ui/spinner';
 import { Trans } from '@kit/ui/trans';
 
-const UpdateEmailForm = lazy(() => {
-  return import('../email/update-email-form').then((m) => ({
-    default: m.UpdateEmailForm,
-  }));
-});
-
-const UpdatePasswordForm = lazy(() => {
-  return import('../password/update-password-form').then((m) => ({
-    default: m.UpdatePasswordForm,
-  }));
-});
+import { UpdateEmailForm } from '../email/update-email-form';
+import { UpdatePasswordForm } from '../password/update-password-form';
 
 interface LinkAccountsListProps {
   providers: Provider[];
@@ -62,13 +55,20 @@ interface LinkAccountsListProps {
   showEmailOption?: boolean;
   enabled?: boolean;
   redirectTo?: string;
+  onPasswordSet?: () => void;
+  onProviderLinked?: () => void;
 }
 
 export function LinkAccountsList(props: LinkAccountsListProps) {
   const unlinkMutation = useUnlinkUserIdentity();
-  const linkMutation = useLinkIdentityWithProvider();
   const location = useLocation();
-  const redirectTo = location.pathname;
+  const pathName = location.pathname;
+
+  const linkMutation = useLinkIdentityWithProvider({
+    redirectToPath: pathName,
+  });
+
+  const user = useUser();
 
   const {
     identities,
@@ -76,13 +76,6 @@ export function LinkAccountsList(props: LinkAccountsListProps) {
     isProviderConnected,
     isLoading: isLoadingIdentities,
   } = useUserIdentities();
-
-  const user = useUser();
-  const amr = user.data ? user.data.amr : [];
-
-  const isConnectedWithPassword = amr.some(
-    (item: { method: string }) => item.method === 'password',
-  );
 
   // Get user email from email identity
   const emailIdentity = identities.find(
@@ -95,6 +88,12 @@ export function LinkAccountsList(props: LinkAccountsListProps) {
   const availableProviders = props.enabled
     ? props.providers.filter((provider) => !isProviderConnected(provider))
     : [];
+
+  const amr = user.data ? user.data.amr : [];
+
+  const isConnectedWithPassword = amr.some(
+    (item: { method: string }) => item.method === 'password',
+  );
 
   // Show all connected identities, even if their provider isn't in the allowed providers list
   const connectedIdentities = identities;
@@ -126,7 +125,10 @@ export function LinkAccountsList(props: LinkAccountsListProps) {
    * @param provider
    */
   const handleLinkAccount = (provider: Provider) => {
-    const promise = linkMutation.mutateAsync(provider);
+    const promise = linkMutation.mutateAsync(provider).then((result) => {
+      props.onProviderLinked?.();
+      return result;
+    });
 
     toast.promise(promise, {
       loading: <Trans i18nKey={'account:linkingAccount'} />,
@@ -253,13 +255,14 @@ export function LinkAccountsList(props: LinkAccountsListProps) {
 
           <div className="flex flex-col space-y-2">
             <If condition={canLinkEmailAccount}>
-              <UpdateEmailDialog redirectTo={redirectTo} />
+              <UpdateEmailDialog redirectTo={pathName} />
             </If>
 
             <If condition={canLinkPassword}>
               <UpdatePasswordDialog
-                redirectTo={props.redirectTo || '/home'}
                 userEmail={userEmail}
+                redirectTo={props.redirectTo || '/home'}
+                onPasswordSet={props.onPasswordSet}
               />
             </If>
 
@@ -366,12 +369,13 @@ function UpdateEmailDialog(props: { redirectTo: string }) {
 function UpdatePasswordDialog(props: {
   redirectTo: string;
   userEmail: string;
+  onPasswordSet?: () => void;
 }) {
   const [open, setOpen] = useState(false);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <DialogTrigger asChild data-test="open-password-dialog-trigger">
         <Item variant="outline" role="button" className="hover:bg-muted/50">
           <ItemMedia>
             <div className="text-muted-foreground flex h-5 w-5 items-center justify-center">
@@ -414,6 +418,7 @@ function UpdatePasswordDialog(props: {
             email={props.userEmail}
             onSuccess={() => {
               setOpen(false);
+              props.onPasswordSet?.();
             }}
           />
         </Suspense>

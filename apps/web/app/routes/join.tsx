@@ -34,6 +34,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   const searchParams = new URL(request.url).searchParams;
   const token = searchParams.get('invite_token');
   const linkType = searchParams.get('type');
+  const isNewUserParam = searchParams.get('is_new_user') === 'true';
 
   // no token, redirect to 404
   if (!token) {
@@ -115,14 +116,14 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   // Determine if we should show the account setup step (Step 2)
   // Decision logic:
   // 1. Only show for new accounts (linkType === 'invite')
-  // 2. Only if we have auth options available (password OR OAuth)
+  // 2. OOnly if we don't support email only auth (magic link or OTP)
   // 3. Users can always skip and set up auth later in account settings
-  const supportsPasswordSignUp = authConfig.providers.password;
-  const supportsOAuthProviders = authConfig.providers.oAuth.length > 0;
-  const isNewAccount = linkType === 'invite';
 
-  const shouldSetupAccount =
-    isNewAccount && (supportsPasswordSignUp || supportsOAuthProviders);
+  // if the app supports email only auth, we don't need to setup any other auth methods. In all other cases (passowrd, oauth), we need to setup at least one of them.
+  const supportsEmailOnlyAuth = authConfig.providers.magicLink;
+  const isNewAccount = isNewUserParam || linkType === 'invite';
+
+  const shouldSetupAccount = isNewAccount && !supportsEmailOnlyAuth;
 
   // Determine redirect destination after joining:
   // - If shouldSetupAccount: redirect to /identities with next param (Step 2)
