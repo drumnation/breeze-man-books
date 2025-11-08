@@ -96,6 +96,7 @@ export const acceptInvitationAction = async (params: {
     {
       inviteToken,
       userId: auth.data.id,
+      userEmail: auth.data.email!,
     },
   );
 

@@ -91,7 +91,7 @@ export function LinkAccountsList(props: LinkAccountsListProps) {
 
   const amr = user.data ? user.data.amr : [];
 
-  const isConnectedWithPassword = amr.some(
+  const isConnectedWithPassword = amr?.some(
     (item: { method: string }) => item.method === 'password',
   );
 

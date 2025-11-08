@@ -246,15 +246,33 @@ class AccountInvitationsService {
     params: {
       userId: string;
       inviteToken: string;
+      userEmail: string;
     },
   ) {
     const logger = await getLogger();
+
     const ctx = {
       name: this.namespace,
       ...params,
     };
 
     logger.info(ctx, 'Accepting invitation to team');
+
+    const invitation = await adminClient
+      .from('invitations')
+      .select('email')
+      .eq('invite_token', params.inviteToken)
+      .single();
+
+    // if the invitation email does not match the user email, throw an error
+    if (invitation.data?.email !== params.userEmail) {
+      logger.error({
+        ...ctx,
+        error: 'Invitation email does not match user email',
+      });
+
+      throw new Error('Invitation email does not match user email');
+    }
 
     const { error, data } = await adminClient.rpc('accept_invitation', {
       token: params.inviteToken,
