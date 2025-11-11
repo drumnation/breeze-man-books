@@ -16,7 +16,7 @@ export function checkPendingMigrations() {
 
     const pendingMigrations = migrationLines
       .filter((line) => {
-        const [local, remote] = line.split('│').map((s) => s.trim());
+        const [local, remote] = line.split('|').map((s) => s.trim());
         return local !== '' && remote === '';
       })
       .map((line) => (line.split('│')[0] ?? '').trim());

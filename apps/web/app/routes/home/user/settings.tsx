@@ -15,7 +15,13 @@ import type { Route } from '~/types/app/routes/home/user/+types/settings';
 
 import { HomeLayoutPageHeader } from './_components/home-page-header';
 
+const showLinkEmailOption =
+  authConfig.providers.password ||
+  authConfig.providers.magicLink ||
+  authConfig.providers.oAuth.length > 0;
+
 const features = {
+  showLinkEmailOption: showLinkEmailOption,
   enableAccountDeletion: featureFlagsConfig.enableAccountDeletion,
   enablePasswordUpdate: authConfig.providers.password,
   enableAccountLinking: authConfig.enableIdentityLinking,
