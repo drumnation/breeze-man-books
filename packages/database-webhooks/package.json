@@ -22,7 +22,7 @@
     "@kit/supabase": "workspace:*",
     "@kit/tsconfig": "workspace:*",
     "@supabase/supabase-js": "catalog:",
-    "zod": "^3.25.76"
+    "zod": "catalog:"
   },
   "typesVersions": {
     "*": {
