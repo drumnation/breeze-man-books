@@ -19,9 +19,8 @@ export class BillingEventHandlerFactoryService {
       }
 
       case 'lemon-squeezy': {
-        const { LemonSqueezyWebhookHandlerService } = await import(
-          '@kit/lemon-squeezy'
-        );
+        const { LemonSqueezyWebhookHandlerService } =
+          await import('@kit/lemon-squeezy');
 
         return new LemonSqueezyWebhookHandlerService(planTypesMap);
       }

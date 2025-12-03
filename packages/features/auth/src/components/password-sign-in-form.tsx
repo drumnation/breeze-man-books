@@ -26,7 +26,13 @@ export const PasswordSignInForm: React.FC<{
   onSubmit: (params: z.infer<typeof PasswordSignInSchema>) => unknown;
   loading: boolean;
   redirecting: boolean;
-}> = ({ onSubmit, loading = false, redirecting = false }) => {
+  captchaLoading?: boolean;
+}> = ({
+  onSubmit,
+  loading = false,
+  redirecting = false,
+  captchaLoading = false,
+}) => {
   const form = useForm<z.infer<typeof PasswordSignInSchema>>({
     resolver: zodResolver(PasswordSignInSchema),
     defaultValues: {
@@ -87,21 +93,27 @@ export const PasswordSignInForm: React.FC<{
           data-test="auth-submit-button"
           className={'group w-full'}
           type="submit"
-          disabled={loading || redirecting}
+          disabled={loading || redirecting || captchaLoading}
         >
-          <If condition={redirecting}>
+          <If condition={captchaLoading}>
+            <span className={'animate-in fade-in slide-in-from-bottom-24'}>
+              <Trans i18nKey={'auth:verifyingCaptcha'} />
+            </span>
+          </If>
+
+          <If condition={redirecting && !captchaLoading}>
             <span className={'animate-in fade-in slide-in-from-bottom-24'}>
               <Trans i18nKey={'auth:redirecting'} />
             </span>
           </If>
 
-          <If condition={loading}>
+          <If condition={loading && !captchaLoading}>
             <span className={'animate-in fade-in slide-in-from-bottom-24'}>
               <Trans i18nKey={'auth:signingIn'} />
             </span>
           </If>
 
-          <If condition={!redirecting && !loading}>
+          <If condition={!redirecting && !loading && !captchaLoading}>
             <span className={'animate-out fade-out flex items-center'}>
               <Trans i18nKey={'auth:signInWithEmail'} />
 

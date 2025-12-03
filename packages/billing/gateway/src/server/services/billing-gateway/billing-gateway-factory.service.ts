@@ -17,9 +17,8 @@ export class BillingGatewayFactoryService {
       }
 
       case 'lemon-squeezy': {
-        const { LemonSqueezyBillingStrategyService } = await import(
-          '@kit/lemon-squeezy'
-        );
+        const { LemonSqueezyBillingStrategyService } =
+          await import('@kit/lemon-squeezy');
 
         return new LemonSqueezyBillingStrategyService();
       }

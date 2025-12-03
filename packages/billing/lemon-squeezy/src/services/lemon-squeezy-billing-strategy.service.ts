@@ -25,9 +25,7 @@ import { createLemonSqueezyBillingPortalSession } from './create-lemon-squeezy-b
 import { createLemonSqueezyCheckout } from './create-lemon-squeezy-checkout';
 import { createLemonSqueezySubscriptionPayloadBuilderService } from './lemon-squeezy-subscription-payload-builder.service';
 
-export class LemonSqueezyBillingStrategyService
-  implements BillingStrategyProviderService
-{
+export class LemonSqueezyBillingStrategyService implements BillingStrategyProviderService {
   private readonly namespace = 'billing.lemon-squeezy';
 
   /**

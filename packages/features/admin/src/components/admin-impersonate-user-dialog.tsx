@@ -89,6 +89,7 @@ export function AdminImpersonateUserDialog(
 
         <Form {...form}>
           <form
+            data-test={'admin-impersonate-user-form'}
             className={'flex flex-col space-y-8'}
             onSubmit={form.handleSubmit((data) => {
               return fetcher.submit(

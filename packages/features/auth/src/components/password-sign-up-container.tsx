@@ -32,6 +32,7 @@ export function EmailPasswordSignUpContainer({
   const signUpMutation = useSignUpWithEmailAndPassword();
   const redirecting = useRef(false);
   const loading = signUpMutation.isPending || redirecting.current;
+  const captchaLoading = !captcha.isReady;
   const [showVerifyEmailAlert, setShowVerifyEmailAlert] = useState(false);
   const appEvents = useAppEvents();
 
@@ -83,6 +84,7 @@ export function EmailPasswordSignUpContainer({
             displayTermsCheckbox={displayTermsCheckbox}
             onSubmit={onSignupRequested}
             loading={loading}
+            captchaLoading={captchaLoading}
           />
 
           {captcha.field}

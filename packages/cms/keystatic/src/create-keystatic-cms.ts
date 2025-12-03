@@ -5,9 +5,8 @@ import { CmsClient } from '@kit/cms-types';
  */
 export async function createKeystaticClient() {
   if (process.env.KEYSTATIC_STORAGE_KIND !== 'local') {
-    const { createKeystaticClient: createClient } = await import(
-      './keystatic-client'
-    ).catch();
+    const { createKeystaticClient: createClient } =
+      await import('./keystatic-client').catch();
 
     return createClient();
   }

@@ -51,7 +51,7 @@ export function PersonalAccountCheckoutForm(props: {
         checkoutToken={checkoutToken}
         provider={billingConfig.provider}
         onClose={() =>
-          fetcher.unstable_reset({
+          fetcher.reset({
             reason: 'Checkout closed',
           })
         }

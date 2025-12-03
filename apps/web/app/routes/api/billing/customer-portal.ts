@@ -40,9 +40,8 @@ export async function action(args: ActionFunctionArgs) {
   try {
     switch (data.intent) {
       case 'account-billing-portal': {
-        const { createTeamBillingService } = await import(
-          '~/lib/billing/.server/team-billing-service.server'
-        );
+        const { createTeamBillingService } =
+          await import('~/lib/billing/.server/team-billing-service.server');
 
         const service = createTeamBillingService(client);
         const url = await service.createBillingPortalSession(data.payload);
@@ -51,9 +50,8 @@ export async function action(args: ActionFunctionArgs) {
       }
 
       case 'personal-account-billing-portal': {
-        const { createUserBillingService } = await import(
-          '~/lib/billing/.server/user-billing-service.server'
-        );
+        const { createUserBillingService } =
+          await import('~/lib/billing/.server/user-billing-service.server');
 
         const service = createUserBillingService(client);
         const url = await service.createBillingPortalSession();

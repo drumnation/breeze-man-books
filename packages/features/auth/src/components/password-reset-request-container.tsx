@@ -33,6 +33,7 @@ export function PasswordResetRequestContainer(params: {
   const { t } = useTranslation('auth');
   const resetPasswordMutation = useRequestResetPassword();
   const captcha = useCaptcha();
+  const captchaLoading = !captcha.isReady;
 
   const error = resetPasswordMutation.error;
   const success = resetPasswordMutation.data;
@@ -106,8 +107,27 @@ export function PasswordResetRequestContainer(params: {
                 )}
               />
 
-              <Button disabled={resetPasswordMutation.isPending} type="submit">
-                <Trans i18nKey={'auth:passwordResetLabel'} />
+              <Button
+                disabled={resetPasswordMutation.isPending || captchaLoading}
+                type="submit"
+              >
+                <If
+                  condition={
+                    !resetPasswordMutation.isPending && !captchaLoading
+                  }
+                >
+                  <Trans i18nKey={'auth:passwordResetLabel'} />
+                </If>
+
+                <If
+                  condition={resetPasswordMutation.isPending && !captchaLoading}
+                >
+                  <Trans i18nKey={'auth:passwordResetLabel'} />
+                </If>
+
+                <If condition={captchaLoading}>
+                  <Trans i18nKey={'auth:verifyingCaptcha'} />
+                </If>
               </Button>
             </div>
           </form>

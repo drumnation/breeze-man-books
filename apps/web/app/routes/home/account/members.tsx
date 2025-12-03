@@ -220,17 +220,15 @@ export const action = async function (args: Route.ActionArgs) {
 
   switch (data.intent) {
     case 'create-invitations': {
-      const { createInvitationsAction } = await import(
-        '@kit/team-accounts/actions'
-      );
+      const { createInvitationsAction } =
+        await import('@kit/team-accounts/actions');
 
       return createInvitationsAction({ client, data });
     }
 
     case 'update-member-role': {
-      const { updateMemberRoleAction } = await import(
-        '@kit/team-accounts/actions'
-      );
+      const { updateMemberRoleAction } =
+        await import('@kit/team-accounts/actions');
 
       return updateMemberRoleAction({
         client,
@@ -239,9 +237,8 @@ export const action = async function (args: Route.ActionArgs) {
     }
 
     case 'renew-invitation': {
-      const { renewInvitationAction } = await import(
-        '@kit/team-accounts/actions'
-      );
+      const { renewInvitationAction } =
+        await import('@kit/team-accounts/actions');
 
       return renewInvitationAction({
         client,
@@ -250,9 +247,8 @@ export const action = async function (args: Route.ActionArgs) {
     }
 
     case 'delete-invitation': {
-      const { deleteInvitationAction } = await import(
-        '@kit/team-accounts/actions'
-      );
+      const { deleteInvitationAction } =
+        await import('@kit/team-accounts/actions');
 
       return deleteInvitationAction({
         client,
@@ -261,9 +257,8 @@ export const action = async function (args: Route.ActionArgs) {
     }
 
     case 'update-invitation': {
-      const { updateInvitationAction } = await import(
-        '@kit/team-accounts/actions'
-      );
+      const { updateInvitationAction } =
+        await import('@kit/team-accounts/actions');
 
       return updateInvitationAction({
         client,
@@ -272,9 +267,8 @@ export const action = async function (args: Route.ActionArgs) {
     }
 
     case 'remove-member': {
-      const { removeMemberFromAccountAction } = await import(
-        '@kit/team-accounts/actions'
-      );
+      const { removeMemberFromAccountAction } =
+        await import('@kit/team-accounts/actions');
 
       return removeMemberFromAccountAction({
         client,
@@ -283,9 +277,8 @@ export const action = async function (args: Route.ActionArgs) {
     }
 
     case 'transfer-ownership': {
-      const { transferOwnershipAction } = await import(
-        '@kit/team-accounts/actions'
-      );
+      const { transferOwnershipAction } =
+        await import('@kit/team-accounts/actions');
 
       return transferOwnershipAction({
         client,

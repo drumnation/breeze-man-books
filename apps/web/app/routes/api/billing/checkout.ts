@@ -34,9 +34,8 @@ export async function action(args: Route.ActionArgs) {
   try {
     switch (data.intent) {
       case 'account-checkout': {
-        const { createTeamBillingService } = await import(
-          '~/lib/billing/.server/team-billing-service.server'
-        );
+        const { createTeamBillingService } =
+          await import('~/lib/billing/.server/team-billing-service.server');
 
         const service = createTeamBillingService(client);
 
@@ -44,9 +43,8 @@ export async function action(args: Route.ActionArgs) {
       }
 
       case 'personal-checkout': {
-        const { createUserBillingService } = await import(
-          '~/lib/billing/.server/user-billing-service.server'
-        );
+        const { createUserBillingService } =
+          await import('~/lib/billing/.server/user-billing-service.server');
 
         const service = createUserBillingService(client);
 

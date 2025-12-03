@@ -60,9 +60,8 @@ export class SentryClientMonitoringService implements MonitoringService {
   }
 
   private async initializeSentryBrowserClient() {
-    const { init, browserTracingIntegration } = await import(
-      '@sentry/react-router'
-    ).catch();
+    const { init, browserTracingIntegration } =
+      await import('@sentry/react-router').catch();
 
     const environment =
       import.meta.env.VITE_SENTRY_ENVIRONMENT ?? import.meta.env.VERCEL_ENV;

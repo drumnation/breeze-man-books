@@ -30,7 +30,8 @@ export const PasswordSignUpForm: React.FC<{
   }) => unknown;
   loading: boolean;
   displayTermsCheckbox?: boolean;
-}> = ({ onSubmit, loading, displayTermsCheckbox }) => {
+  captchaLoading?: boolean;
+}> = ({ onSubmit, loading, displayTermsCheckbox, captchaLoading = false }) => {
   const form = useForm({
     resolver: zodResolver(PasswordSignUpSchema),
     defaultValues: {
@@ -104,23 +105,26 @@ export const PasswordSignUpForm: React.FC<{
           data-test={'auth-submit-button'}
           className={'w-full'}
           type="submit"
-          disabled={loading}
+          disabled={loading || captchaLoading}
         >
-          <If
-            condition={loading}
-            fallback={
-              <>
-                <Trans i18nKey={'auth:signUpWithEmail'} />
+          <If condition={captchaLoading}>
+            <Trans i18nKey={'auth:verifyingCaptcha'} />
+          </If>
 
-                <ArrowRight
-                  className={
-                    'zoom-in animate-in slide-in-from-left-2 fill-mode-both h-4 delay-500 duration-500'
-                  }
-                />
-              </>
-            }
-          >
+          <If condition={loading && !captchaLoading}>
             <Trans i18nKey={'auth:signingUp'} />
+          </If>
+
+          <If condition={!loading && !captchaLoading}>
+            <>
+              <Trans i18nKey={'auth:signUpWithEmail'} />
+
+              <ArrowRight
+                className={
+                  'zoom-in animate-in slide-in-from-left-2 fill-mode-both h-4 delay-500 duration-500'
+                }
+              />
+            </>
           </If>
         </Button>
       </form>

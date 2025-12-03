@@ -39,7 +39,7 @@ export function TeamAccountCheckoutForm(params: {
           checkoutToken={checkoutToken!}
           provider={billingConfig.provider}
           onClose={() =>
-            fetcher.unstable_reset({
+            fetcher.reset({
               reason: 'Checkout was closed',
             })
           }

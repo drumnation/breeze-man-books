@@ -20,9 +20,8 @@ export async function getServerMonitoringService() {
 
   switch (MONITORING_PROVIDER) {
     case InstrumentationProvider.Sentry: {
-      const { SentryServerMonitoringService } = await import(
-        '@kit/sentry/server'
-      );
+      const { SentryServerMonitoringService } =
+        await import('@kit/sentry/server');
 
       return new SentryServerMonitoringService();
     }

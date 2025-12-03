@@ -21,9 +21,8 @@ export async function action({ request }: Route.ActionArgs) {
 
   switch (body.intent) {
     case 'create-account': {
-      const { createTeamAccountAction } = await import(
-        '@kit/team-accounts/actions'
-      );
+      const { createTeamAccountAction } =
+        await import('@kit/team-accounts/actions');
 
       return createTeamAccountAction({
         client,

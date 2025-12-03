@@ -15,9 +15,7 @@ export function createDatabaseWebhookVerifierService() {
   return new PostgresDatabaseWebhookVerifierService();
 }
 
-class PostgresDatabaseWebhookVerifierService
-  implements DatabaseWebhookVerifierService
-{
+class PostgresDatabaseWebhookVerifierService implements DatabaseWebhookVerifierService {
   verifySignatureOrThrow(request: Request) {
     const header = request.headers.get('X-Supabase-Event-Signature');
 

@@ -37,6 +37,7 @@ export function MagicLinkAuthContainer({
   captchaSiteKey?: string;
 }) {
   const captcha = useCaptcha({ siteKey: captchaSiteKey });
+  const captchaLoading = !captcha.isReady;
   const { t } = useTranslation();
   const signInWithOtpMutation = useSignInWithOtp();
   const appEvents = useAppEvents();
@@ -115,12 +116,17 @@ export function MagicLinkAuthContainer({
             <TermsAndConditionsFormField />
           </If>
 
-          <Button disabled={signInWithOtpMutation.isPending}>
-            <If
-              condition={signInWithOtpMutation.isPending}
-              fallback={<Trans i18nKey={'auth:sendEmailLink'} />}
-            >
+          <Button disabled={signInWithOtpMutation.isPending || captchaLoading}>
+            <If condition={captchaLoading}>
+              <Trans i18nKey={'auth:verifyingCaptcha'} />
+            </If>
+
+            <If condition={signInWithOtpMutation.isPending && !captchaLoading}>
               <Trans i18nKey={'auth:sendingEmailLink'} />
+            </If>
+
+            <If condition={!signInWithOtpMutation.isPending && !captchaLoading}>
+              <Trans i18nKey={'auth:sendEmailLink'} />
             </If>
           </Button>
         </div>
