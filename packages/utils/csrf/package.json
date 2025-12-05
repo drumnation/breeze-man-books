@@ -21,8 +21,8 @@
     "@kit/tsconfig": "workspace:*",
     "@react-router/node": "^7.10.0",
     "@types/react": "catalog:",
-    "react": "19.2.0",
-    "react-hook-form": "^7.67.0",
+    "react": "catalog:",
+    "react-hook-form": "^7.68.0",
     "zod": "catalog:"
   },
   "dependencies": {

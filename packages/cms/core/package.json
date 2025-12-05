@@ -21,7 +21,7 @@
     "@kit/wordpress": "workspace:*",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
-    "react": "19.2.0"
+    "react": "catalog:"
   },
   "typesVersions": {
     "*": {

@@ -19,7 +19,7 @@
     "@kit/tailwind-config": "workspace:*",
     "@kit/tsconfig": "workspace:*",
     "@types/react": "catalog:",
-    "react": "19.2.0"
+    "react": "catalog:"
   },
   "typesVersions": {
     "*": {
