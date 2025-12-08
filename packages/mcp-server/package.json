@@ -23,7 +23,7 @@
     "@kit/eslint-config": "workspace:*",
     "@kit/prettier-config": "workspace:*",
     "@kit/tsconfig": "workspace:*",
-    "@modelcontextprotocol/sdk": "1.24.2",
+    "@modelcontextprotocol/sdk": "1.24.3",
     "@types/node": "catalog:",
     "postgres": "3.4.7",
     "zod": "catalog:"
