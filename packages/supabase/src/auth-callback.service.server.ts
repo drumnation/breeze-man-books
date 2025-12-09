@@ -4,6 +4,8 @@ import {
   SupabaseClient,
 } from '@supabase/supabase-js';
 
+import { getSafeRedirectPath } from '@kit/shared/utils';
+
 /**
  * @name createAuthCallbackService
  * @description Creates an instance of the AuthCallbackService
@@ -44,22 +46,33 @@ class AuthCallbackService {
     const callbackParam =
       searchParams.get('next') ?? searchParams.get('callback');
 
-    const next = callbackParam
-      ? new URL(callbackParam).pathname
-      : params.redirectPath;
-
+    let next = params.redirectPath;
     let nextPath: string | null = null;
-    const callbackUrl = callbackParam ? new URL(callbackParam) : null;
+    let callbackUrl: URL | null = null;
 
-    if (callbackUrl) {
-      // if we have a callback url, we check if it has a next path
-      const callbackNextPath = callbackUrl.searchParams.get('next');
+    if (callbackParam) {
+      try {
+        // Parse as URL (use dummy base for relative paths)
+        callbackUrl = new URL(callbackParam, 'http://localhost');
+        const pathname = callbackUrl.pathname;
 
-      // if we have a next path in the callback url, we use that
-      if (callbackNextPath) {
-        nextPath = callbackNextPath;
-      } else {
-        nextPath = callbackUrl.pathname;
+        // Validate pathname is safe
+        next = getSafeRedirectPath(pathname, params.redirectPath);
+
+        // Check for nested next param
+        const callbackNextPath = callbackUrl.searchParams.get('next');
+
+        if (callbackNextPath) {
+          // Validate nested next path, fall back to pathname if invalid
+          const safePath = getSafeRedirectPath(callbackNextPath, pathname);
+          nextPath = safePath;
+        } else {
+          // Use validated pathname
+          nextPath = next;
+        }
+      } catch {
+        // Invalid URL format, use default
+        next = params.redirectPath;
       }
     }
 
@@ -140,7 +153,10 @@ class AuthCallbackService {
     const inviteToken = searchParams.get('invite_token');
     const errorPath = params.errorPath ?? '/auth/callback/error';
 
-    let nextUrl = nextUrlPathFromParams ?? params.redirectPath;
+    let nextUrl = getSafeRedirectPath(
+      nextUrlPathFromParams,
+      params.redirectPath,
+    );
 
     // if we have an invite token, we redirect to the join team page
     // instead of the default next url. This is because the user is trying
