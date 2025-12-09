@@ -6,6 +6,7 @@ import type { Provider } from '@supabase/supabase-js';
 
 import { LinkAccountsList } from '@kit/accounts/personal-account-settings';
 import { AuthLayoutShell } from '@kit/auth/shared';
+import { getSafeRedirectPath } from '@kit/shared/utils';
 import { useUser } from '@kit/supabase/hooks/use-user';
 import { useUserIdentities } from '@kit/supabase/hooks/use-user-identities';
 import { requireUser } from '@kit/supabase/require-user';
@@ -54,7 +55,10 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 
   // Get the next path from URL params (where to redirect after setup)
   const searchParams = new URL(request.url).searchParams;
-  const nextPath = searchParams.get('next') || pathsConfig.app.home;
+  const nextPath = getSafeRedirectPath(
+    searchParams.get('next'),
+    pathsConfig.app.home,
+  );
 
   // Available auth methods to add
   const showPasswordOption = authConfig.providers.password;

@@ -1,6 +1,7 @@
 import { redirect } from 'react-router';
 
 import { MultiFactorChallengeContainer } from '@kit/auth/mfa';
+import { getSafeRedirectPath } from '@kit/shared/utils';
 import { checkRequiresMultiFactorAuthentication } from '@kit/supabase/check-requires-mfa';
 import { getSupabaseServerClient } from '@kit/supabase/server-client';
 
@@ -25,7 +26,10 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 
   const i18n = await createI18nServerInstance(request);
   const searchParams = new URL(request.url).searchParams;
-  const redirectPath = searchParams.get('next') ?? pathsConfig.app.home;
+  const redirectPath = getSafeRedirectPath(
+    searchParams.get('next'),
+    pathsConfig.app.home,
+  );
 
   return {
     title: i18n.t('auth:signIn'),

@@ -1,6 +1,7 @@
 import { Link, redirect } from 'react-router';
 
 import { SignInMethodsContainer } from '@kit/auth/sign-in';
+import { getSafeRedirectPath } from '@kit/shared/utils';
 import { requireUser } from '@kit/supabase/require-user';
 import { getSupabaseServerClient } from '@kit/supabase/server-client';
 import { Button } from '@kit/ui/button';
@@ -22,7 +23,10 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
   }
 
   const searchParams = new URL(request.url).searchParams;
-  const returnPath = searchParams.get('next') ?? pathsConfig.app.home;
+  const returnPath = getSafeRedirectPath(
+    searchParams.get('next'),
+    pathsConfig.app.home,
+  );
 
   return {
     title: i18n.t('auth:signIn'),

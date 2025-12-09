@@ -1320,6 +1320,10 @@ importers:
         version: 19.2.7
 
   packages/supabase:
+    dependencies:
+      '@kit/shared':
+        specifier: workspace:*
+        version: link:../shared
     devDependencies:
       '@kit/eslint-config':
         specifier: workspace:*

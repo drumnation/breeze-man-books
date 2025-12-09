@@ -2,6 +2,7 @@ import { redirect } from 'react-router';
 
 import { UpdatePasswordForm } from '@kit/auth/password-reset';
 import { AuthLayoutShell } from '@kit/auth/shared';
+import { getSafeRedirectPath } from '@kit/shared/utils';
 
 import { AppLogo } from '~/components/app-logo';
 import pathsConfig from '~/config/paths.config';
@@ -12,7 +13,10 @@ import type { Route } from '~/types/app/routes/+types/update-password';
 export const loader = async (args: Route.LoaderArgs) => {
   const { t } = await createI18nServerInstance(args.request);
   const params = new URL(args.request.url).searchParams;
-  const next = params.get('callback') ?? pathsConfig.app.home;
+  const next = getSafeRedirectPath(
+    params.get('callback'),
+    pathsConfig.app.home,
+  );
   const user = await requireUserLoader(args.request);
 
   if (!user) {
