@@ -1,6 +1,34 @@
 import { Page } from '@playwright/test';
 import { parse } from 'node-html-parser';
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 type MessageSummary = {
   ID: string;
   MessageID: string;
@@ -138,7 +166,7 @@ export class Mailbox {
   ) {
     console.log(`Retrieving email from mailbox ${email}...`);
 
-    const url = `${Mailbox.URL}/api/v1/search?query=to:${email}`;
+    const url = `${Mailbox.URL}/api/v1/search?query=to:${encodeURIComponent(email)}`;
     const response = await fetch(url);
 
     if (!response.ok) {
@@ -156,7 +184,7 @@ export class Mailbox {
     const message = params.subject
       ? (() => {
           const filtered = messagesResponse.messages.filter(
-            (item) => item.Subject === params.subject,
+            (item) => item.Subject.toLowerCase() === params.subject?.toLowerCase(),
           );
 
           console.log(
@@ -183,6 +211,7 @@ export class Mailbox {
 
           return acc;
         });
+
 
     if (!message) {
       throw new Error('No message found');

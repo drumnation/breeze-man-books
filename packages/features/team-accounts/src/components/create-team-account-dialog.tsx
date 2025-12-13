@@ -4,7 +4,6 @@ import { useFetcher } from 'react-router';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 
 import { useCsrfToken } from '@kit/csrf/client';
 import { Alert, AlertDescription, AlertTitle } from '@kit/ui/alert';
@@ -66,7 +65,7 @@ function CreateTeamAccountForm(props: { onClose: () => void }) {
 
   const csrfToken = useCsrfToken();
 
-  const form = useForm<z.infer<typeof CreateTeamSchema>>({
+  const form = useForm({
     defaultValues: {
       name: '',
       csrfToken,

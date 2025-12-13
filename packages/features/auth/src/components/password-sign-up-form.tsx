@@ -11,7 +11,6 @@ import {
   FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@kit/ui/form';
 import { If } from '@kit/ui/if';
@@ -80,10 +79,6 @@ export const PasswordSignUpForm: React.FC<{
           name={'repeatPassword'}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>
-                <Trans i18nKey={'auth:repeatPassword'} />
-              </FormLabel>
-
               <FormControl>
                 <PasswordInput data-test="repeat-password-input" {...field} />
               </FormControl>

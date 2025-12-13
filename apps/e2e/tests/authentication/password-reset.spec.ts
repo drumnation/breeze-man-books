@@ -1,6 +1,66 @@
 import { expect, test } from '@playwright/test';
 
+
+
 import { AuthPageObject } from './auth.po';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 const newPassword = (Math.random() * 10000).toString();
 
@@ -10,27 +70,27 @@ test.describe('Password Reset Flow', () => {
 
     let email = '';
 
+    email = `test-${Math.random() * 10000}@makerkit.dev`;
+
+    await page.goto('/auth/sign-up');
+
+    await auth.signUp({
+      email,
+      password: 'password',
+      repeatPassword: 'password',
+    });
+
+    await auth.visitConfirmEmailLink(email, {
+      deleteAfter: true,
+      subject: 'Confirm Your Email',
+    });
+
+    await page.context().clearCookies();
+    await page.reload();
+
+    await page.goto('/auth/password-reset');
+
     await expect(async () => {
-      email = `test-${Math.random() * 10000}@makerkit.dev`;
-
-      await page.goto('/auth/sign-up');
-
-      await auth.signUp({
-        email,
-        password: 'password',
-        repeatPassword: 'password',
-      });
-
-      await auth.visitConfirmEmailLink(email, {
-        deleteAfter: true,
-        subject: 'Confirm your email',
-      });
-
-      await page.context().clearCookies();
-      await page.reload();
-
-      await page.goto('/auth/password-reset');
-
       await page.waitForTimeout(250);
 
       await page.fill('[name="email"]', email);
@@ -40,7 +100,9 @@ test.describe('Password Reset Flow', () => {
         deleteAfter: true,
         subject: 'Reset your password',
       });
+    }).toPass();
 
+    await expect(async () => {
       await auth.updatePassword(newPassword);
 
       await page.waitForURL('/home');

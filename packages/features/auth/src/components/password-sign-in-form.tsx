@@ -33,7 +33,7 @@ export const PasswordSignInForm: React.FC<{
   redirecting = false,
   captchaLoading = false,
 }) => {
-  const form = useForm<z.infer<typeof PasswordSignInSchema>>({
+  const form = useForm({
     resolver: zodResolver(PasswordSignInSchema),
     defaultValues: {
       email: '',
