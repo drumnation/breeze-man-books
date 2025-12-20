@@ -32,7 +32,7 @@
     "@tanstack/react-query": "catalog:",
     "@types/react": "catalog:",
     "react": "catalog:",
-    "react-router": "^7.10.1",
+    "react-router": "^7.11.0",
     "server-only": "^0.0.1",
     "zod": "catalog:"
   },

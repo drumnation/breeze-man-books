@@ -169,9 +169,13 @@ export function IdentitiesStep(props: IdentitiesStepProps) {
     if (initialHasPasswordRef.current === null && user.data) {
       const amr = user.data.amr || [];
 
-      const hasPassword = amr.some(
-        (item: { method: string }) => item.method === 'password',
-      );
+      const hasPassword = amr.some((item) => {
+        if (typeof item === 'string') {
+          return item === 'password';
+        }
+
+        return item.method === 'password';
+      });
 
       initialHasPasswordRef.current = hasPassword;
     }
@@ -193,9 +197,13 @@ export function IdentitiesStep(props: IdentitiesStepProps) {
     // Check if password was added
     const amr = user.data?.amr || [];
 
-    const currentHasPassword = amr.some(
-      (item: { method: string }) => item.method === 'password',
-    );
+    const currentHasPassword = amr.some((item) => {
+      if (typeof item === 'string') {
+        return item === 'password';
+      }
+
+      return item.method === 'password';
+    });
 
     const hasAddedPassword =
       currentHasPassword && !initialHasPasswordRef.current;
