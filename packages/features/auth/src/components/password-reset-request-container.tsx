@@ -29,10 +29,11 @@ const PasswordResetSchema = z.object({
 
 export function PasswordResetRequestContainer(params: {
   redirectPath: string;
+  captchaSiteKey?: string;
 }) {
   const { t } = useTranslation('auth');
   const resetPasswordMutation = useRequestResetPassword();
-  const captcha = useCaptcha();
+  const captcha = useCaptcha({ siteKey: params.captchaSiteKey });
   const captchaLoading = !captcha.isReady;
 
   const error = resetPasswordMutation.error;

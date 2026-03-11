@@ -7,6 +7,7 @@ import { Button } from '@kit/ui/button';
 import { Heading } from '@kit/ui/heading';
 import { Trans } from '@kit/ui/trans';
 
+import authConfig from '~/config/auth.config';
 import pathsConfig from '~/config/paths.config';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import type { Route } from '~/types/app/routes/auth/+types/password-reset';
@@ -43,7 +44,10 @@ export default function PasswordResetPage() {
       </Heading>
 
       <div className={'flex flex-col space-y-4'}>
-        <PasswordResetRequestContainer redirectPath={redirectPath} />
+        <PasswordResetRequestContainer
+          redirectPath={redirectPath}
+          captchaSiteKey={authConfig.captchaTokenSiteKey}
+        />
 
         <div className={'flex justify-center text-xs'}>
           <Button asChild variant={'link'} size={'sm'}>
