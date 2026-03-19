@@ -19,6 +19,7 @@ const rootRoutes = [
 const apiRoutes = [
   route('api/accounts', 'routes/api/accounts.ts'),
   route('api/billing/checkout', 'routes/api/billing/checkout.ts'),
+  route('api/billing/customer-portal', 'routes/api/billing/customer-portal.ts'),
   route('api/billing/webhook', 'routes/api/billing/webhook.ts'),
   route('api/db/webhook', 'routes/api/db/webhook.ts'),
   route('api/otp/send', 'routes/api/otp/send.ts'),
