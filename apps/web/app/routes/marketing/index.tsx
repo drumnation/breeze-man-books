@@ -1,197 +1,176 @@
 import { Link } from 'react-router';
 
-import { ArrowRightIcon, LayoutDashboard } from 'lucide-react';
-
-import { PricingTable } from '@kit/billing-gateway/marketing';
-import {
-  CtaButton,
-  EcosystemShowcase,
-  FeatureCard,
-  FeatureGrid,
-  FeatureShowcase,
-  FeatureShowcaseIconContainer,
-  Hero,
-  Pill,
-  PillActionButton,
-  SecondaryHero,
-} from '@kit/ui/marketing';
-import { Trans } from '@kit/ui/trans';
-
-import billingConfig from '~/config/billing.config';
-import pathsConfig from '~/config/paths.config';
+const BOOKS = [
+  {
+    title: 'Breeze Man vs. The Laser Sharks',
+    cover: '/books/book1-cover.png',
+    description:
+      'When Laser Sharks invade the coast, only one hero has enough rizz to stop them. Breeze Man enters the chat.',
+    amazon: 'https://www.amazon.com/dp/B0FHWTFPWD',
+  },
+  {
+    title: 'Breeze Man vs. The Basic Overlord',
+    cover: '/books/book2-cover.png',
+    description:
+      'The Basic Overlord wants to make everything mid. Breeze Man must protect the drip at all costs.',
+    amazon: 'https://www.amazon.com/dp/B0FFT561TR',
+  },
+  {
+    title: 'Breeze Man vs. The Rizz Badger',
+    cover: '/books/book3-cover.png',
+    description:
+      'A new rival with unmatched rizz appears. Can Breeze Man out-rizz the Rizz Badger? No cap.',
+    amazon: 'https://www.amazon.com/dp/B0FSZGSZNG',
+  },
+];
 
 export default function Index() {
   return (
-    <div className={'mt-4 flex flex-col space-y-24 py-14'}>
-      <div className={'mx-auto'}>
-        <Hero
-          pill={
-            <Pill label={'New'}>
-              <span>The SaaS Starter Kit for ambitious developers</span>
-              <PillActionButton asChild>
-                <Link to={'/auth/sign-up'}>
-                  <ArrowRightIcon className={'h-4 w-4'} />
-                </Link>
-              </PillActionButton>
-            </Pill>
-          }
-          title={
-            <span className="text-secondary-foreground">
-              <span>Ship a SaaS faster than ever.</span>
-            </span>
-          }
-          subtitle={
-            <span>
-              Makerkit gives you a production-ready boilerplate to build your
-              SaaS faster than ever before with the next-gen SaaS Starter Kit.
-              Get started in minutes.
-            </span>
-          }
-          cta={<MainCallToActionButton />}
-          image={
-            <img
-              className={
-                'dark:border-primary/10 w-full rounded-lg border border-gray-200'
-              }
-              width={3558}
-              height={2222}
-              src={`/images/dashboard.webp`}
-              alt={`App Image`}
-            />
-          }
+    <div className="flex flex-col">
+      {/* HERO */}
+      <section className="relative flex min-h-[80vh] items-center justify-center overflow-hidden bg-black text-white">
+        <img
+          src="/books/hero.png"
+          alt="The Brain Rot Books characters"
+          className="absolute inset-0 h-full w-full object-cover opacity-40"
         />
-      </div>
-
-      <div className={'container mx-auto'}>
-        <div className={'py-4 xl:py-8'}>
-          <FeatureShowcase
-            heading={
-              <>
-                <b className="font-medium tracking-tight dark:text-white">
-                  The ultimate SaaS Starter Kit
-                </b>
-                .{' '}
-                <span className="text-secondary-foreground/70 block font-normal tracking-tight">
-                  Unleash your creativity and build your SaaS faster than ever
-                  with Makerkit.
-                </span>
-              </>
-            }
-            icon={
-              <FeatureShowcaseIconContainer>
-                <LayoutDashboard className="h-4 w-4" />
-                <span>All-in-one solution</span>
-              </FeatureShowcaseIconContainer>
-            }
-          >
-            <FeatureGrid>
-              <FeatureCard
-                className={'relative col-span-1 overflow-hidden'}
-                label={'Beautiful Dashboard'}
-                description={`Makerkit provides a beautiful dashboard to manage your SaaS business.`}
-              ></FeatureCard>
-
-              <FeatureCard
-                className={'relative col-span-1 w-full overflow-hidden'}
-                label={'Authentication'}
-                description={`Makerkit provides a variety of providers to allow your users to sign in.`}
-              ></FeatureCard>
-
-              <FeatureCard
-                className={'relative col-span-1 overflow-hidden'}
-                label={'Multi Tenancy'}
-                description={`Multi tenant memberships for your SaaS business.`}
-              />
-
-              <FeatureCard
-                className={'relative col-span-1 overflow-hidden'}
-                label={'Billing'}
-                description={`Makerkit supports multiple payment gateways to charge your customers.`}
-              />
-
-              <FeatureCard
-                className={'relative col-span-1 overflow-hidden'}
-                label={'Plugins'}
-                description={`Extend your SaaS with plugins that you can install using the CLI.`}
-              />
-
-              <FeatureCard
-                className={'relative col-span-1 overflow-hidden'}
-                label={'Documentation'}
-                description={`Makerkit provides a comprehensive documentation to help you get started.`}
-              />
-            </FeatureGrid>
-          </FeatureShowcase>
-        </div>
-      </div>
-
-      <div className={'container mx-auto'}>
-        <EcosystemShowcase
-          heading="The ultimate SaaS Starter Kit for founders."
-          description="Unleash your creativity and build your SaaS faster than ever with Makerkit. Get started in minutes and ship your SaaS in no time."
-        >
-          <img
-            className="rounded-md"
-            src={'/images/sign-in.webp'}
-            alt="Sign in"
-            width={1000}
-            height={1000}
-          />
-        </EcosystemShowcase>
-      </div>
-
-      <div className={'container mx-auto'}>
-        <div
-          className={
-            'flex flex-col items-center justify-center space-y-12 py-4 xl:py-8'
-          }
-        >
-          <SecondaryHero
-            pill={<Pill label="Start for free">No credit card required.</Pill>}
-            heading="Fair pricing for all types of businesses"
-            subheading="Get started on our free plan and upgrade when you are ready."
-          />
-
-          <div className={'w-full'}>
-            <PricingTable
-              config={billingConfig}
-              paths={{
-                signUp: pathsConfig.auth.signUp,
-                return: pathsConfig.app.home,
-              }}
-            />
+        <div className="relative z-10 mx-auto max-w-4xl px-4 py-20 text-center">
+          <h1 className="mb-6 text-5xl font-black uppercase leading-none tracking-tighter md:text-7xl lg:text-8xl">
+            THESE AREN&apos;T JUST BOOKS.
+            <br />
+            <span className="inline-block border-4 border-white px-4 py-1 mt-2">
+              THEY ARE A VIBE.
+            </span>
+          </h1>
+          <p className="mt-6 text-lg font-bold uppercase tracking-widest opacity-70">
+            @thebrainrotbooks on all platforms
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-4">
+            <a
+              href="#books"
+              className="border-2 border-white bg-white px-8 py-3 text-sm font-black uppercase tracking-wide text-black transition-colors hover:bg-transparent hover:text-white"
+            >
+              See the Books
+            </a>
+            <Link
+              to="/store"
+              className="border-2 border-white px-8 py-3 text-sm font-black uppercase tracking-wide transition-colors hover:bg-white hover:text-black"
+            >
+              Get Signed Copies
+            </Link>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* VIDEO SECTION */}
+      <section className="border-b-4 border-black bg-white py-16">
+        <div className="mx-auto max-w-4xl px-4 text-center">
+          <h2 className="mb-2 text-3xl font-black uppercase tracking-tighter md:text-4xl">
+            Watch Breeze Man in Action
+          </h2>
+          <p className="mb-8 text-sm font-bold uppercase tracking-widest opacity-50">
+            Book 1 Reading
+          </p>
+          <div className="relative mx-auto aspect-video max-w-2xl overflow-hidden border-4 border-black bg-black">
+            <video
+              controls
+              preload="metadata"
+              className="h-full w-full"
+              poster="/books/book1-cover.png"
+            >
+              <source src="/books/book1-reading.mov" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        </div>
+      </section>
+
+      {/* BOOKS SECTION */}
+      <section id="books" className="border-b-4 border-black bg-white py-16">
+        <div className="mx-auto max-w-6xl px-4">
+          <h2 className="mb-12 text-center text-4xl font-black uppercase tracking-tighter md:text-5xl">
+            THE BRAIN ROT BOOKS
+          </h2>
+          <div className="grid gap-8 md:grid-cols-3">
+            {BOOKS.map((book) => (
+              <BookCard key={book.title} {...book} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CLASSROOM SECTION */}
+      <section
+        id="classroom"
+        className="border-b-4 border-black bg-black py-16 text-white"
+      >
+        <div className="mx-auto max-w-3xl px-4 text-center">
+          <h2 className="mb-4 text-4xl font-black uppercase tracking-tighter md:text-5xl">
+            BULK ORDERS FOR TEACHERS
+          </h2>
+          <p className="mb-2 text-lg font-bold">
+            Classroom Pack: 5 books for $35
+          </p>
+          <p className="mb-8 text-sm opacity-70">
+            Get your students reading with Breeze Man. Perfect for classroom
+            libraries, reading groups, and rewards.
+          </p>
+          <Link
+            to="/store"
+            className="inline-block border-2 border-white bg-white px-10 py-4 text-sm font-black uppercase tracking-wide text-black transition-colors hover:bg-transparent hover:text-white"
+          >
+            Order Classroom Pack — $35
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }
 
-function MainCallToActionButton() {
+function BookCard({
+  title,
+  cover,
+  description,
+  amazon,
+}: {
+  title: string;
+  cover: string;
+  description: string;
+  amazon: string;
+}) {
   return (
-    <div className={'flex space-x-2.5'}>
-      <CtaButton className="h-10 text-sm">
-        <Link to={'/auth/sign-up'}>
-          <span className={'flex items-center space-x-0.5'}>
-            <span>
-              <Trans i18nKey={'common:getStarted'} />
-            </span>
-
-            <ArrowRightIcon
-              className={
-                'animate-in fade-in slide-in-from-left-8 h-4' +
-                ' zoom-in fill-mode-both delay-1000 duration-1000'
-              }
-            />
-          </span>
-        </Link>
-      </CtaButton>
-
-      <CtaButton variant={'link'} className="h-10 text-sm">
-        <Link to={'/pricing'}>
-          <Trans i18nKey={'common:pricing'} />
-        </Link>
-      </CtaButton>
+    <div className="flex flex-col border-4 border-black bg-white">
+      <div className="flex items-center justify-center bg-neutral-100 p-4">
+        <img
+          src={cover}
+          alt={title}
+          className="h-80 w-auto object-contain"
+        />
+      </div>
+      <div className="flex flex-1 flex-col p-6">
+        <h3 className="mb-2 text-lg font-black uppercase tracking-tight">
+          {title}
+        </h3>
+        <p className="mb-6 flex-1 text-sm leading-relaxed opacity-70">
+          {description}
+        </p>
+        <div className="flex flex-col gap-2">
+          <a
+            href={amazon}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block border-2 border-black bg-black py-2 text-center text-sm font-bold uppercase tracking-wide text-white transition-colors hover:bg-white hover:text-black"
+          >
+            Buy on Amazon — $10
+          </a>
+          <Link
+            to="/store"
+            className="block border-2 border-black py-2 text-center text-sm font-bold uppercase tracking-wide transition-colors hover:bg-black hover:text-white"
+          >
+            Get Signed Copy — $15
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

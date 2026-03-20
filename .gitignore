@@ -51,4 +51,4 @@ vite.config.ts.timestamp-*
 
 # local env files
 .env*
-.dev.vars
+.dev.varsapps/web/.env.local

@@ -23,10 +23,13 @@ const apiRoutes = [
   route('api/billing/webhook', 'routes/api/billing/webhook.ts'),
   route('api/db/webhook', 'routes/api/db/webhook.ts'),
   route('api/otp/send', 'routes/api/otp/send.ts'),
+  route('api/store/checkout', 'routes/api/store/checkout.ts'),
+  route('api/store/webhook', 'routes/api/store/webhook.ts'),
 ];
 
 const marketingLayout = layout('routes/marketing/layout.tsx', [
   index('routes/marketing/index.tsx'),
+  route('store', 'routes/marketing/store.tsx'),
   route('terms-of-service', 'routes/marketing/terms-of-service.tsx'),
   route('privacy-policy', 'routes/marketing/privacy-policy.tsx'),
   route('pricing', 'routes/marketing/pricing.tsx'),
