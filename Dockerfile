@@ -17,9 +17,11 @@ FROM node:22-alpine AS runner
 WORKDIR /app
 COPY --from=base /app/apps/web/build ./build
 COPY --from=base /app/apps/web/package.json ./package.json
-COPY --from=base /app/apps/web/.env ./.env
 COPY --from=base /app/node_modules ./node_modules
+
 ENV NODE_ENV=production
 ENV PORT=3000
+ENV SUPABASE_SECRET_KEY=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc3NDAzMTc2MCwiZXhwIjo0OTI5NzA1MzYwLCJyb2xlIjoic2VydmljZV9yb2xlIn0.VhuKU2qqlUXJTzL5-7xR2ET1SZoaMp9O8wFVtkNi5vQ
+
 EXPOSE 3000
 CMD ["node", "build/server/index.js"]
