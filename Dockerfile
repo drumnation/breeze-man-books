@@ -8,6 +8,8 @@ COPY tooling/ ./tooling/
 COPY apps/web/ ./apps/web/
 
 RUN pnpm install --frozen-lockfile
+
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN pnpm --filter web build
 
 FROM node:22-alpine AS runner
