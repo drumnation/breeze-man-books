@@ -1,28 +1,51 @@
-FROM node:22-alpine AS base
-RUN npm install -g pnpm@10
+# syntax=docker.io/docker/dockerfile:1
+FROM node:20-alpine AS base
 
+# Install dependencies only when needed
+FROM base AS deps
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml turbo.json ./
-COPY packages/ ./packages/
-COPY tooling/ ./tooling/
-COPY apps/web/ ./apps/web/
 
+RUN corepack enable pnpm
+RUN npm install -g turbo
+
+COPY . .
+
+RUN echo "node-linker=hoisted" >> .npmrc
 RUN pnpm install --frozen-lockfile
-RUN cp -f apps/web/.env.production apps/web/.env
+RUN npm rebuild lightingcss --build-from-source --verbose
+
+FROM base AS builder
+WORKDIR /app
+
+RUN corepack enable pnpm
+RUN npm install -g turbo
+
+COPY --from=deps /app ./
 
 ENV NODE_OPTIONS="--max-old-space-size=4096"
-RUN pnpm --filter web build
+RUN turbo run build --filter=web...
 
-FROM node:22-alpine AS runner
+FROM base AS runner
 WORKDIR /app
-COPY --from=base /app/apps/web/build ./build
-COPY --from=base /app/apps/web/package.json ./package.json
-COPY --from=base /app/node_modules ./node_modules
 
 ENV NODE_ENV=production
-ENV PORT=3000
-ENV SUPABASE_SECRET_KEY=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc3NDAzMTc2MCwiZXhwIjo0OTI5NzA1MzYwLCJyb2xlIjoic2VydmljZV9yb2xlIn0.VhuKU2qqlUXJTzL5-7xR2ET1SZoaMp9O8wFVtkNi5vQ
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 rr
+
+COPY --from=builder /app/apps/web/package.json ./package.json
+COPY --from=builder /app/apps/web/build ./build
+COPY --from=builder /app/node_modules ./node_modules
+RUN npm -g install cross-env @react-router/serve
+
+USER rr
 
 EXPOSE 3000
-CMD ["node", "build/server/index.js"]
-# rebuild 1774040448
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+HEALTHCHECK --interval=90s --timeout=5s --retries=3 \
+CMD curl -f http://localhost:3000/healthcheck || exit 1
+
+CMD ["npm", "start"]
