@@ -25,3 +25,4 @@ ENV SUPABASE_SECRET_KEY=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmF
 
 EXPOSE 3000
 CMD ["node", "build/server/index.js"]
+# rebuild 1774040448
