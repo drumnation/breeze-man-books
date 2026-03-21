@@ -81,12 +81,9 @@ export async function action({ request }: Route.ActionArgs) {
     };
 
     // If using Stripe Connect, charge on behalf of the connected account
-    const options: any = {};
-    if (connectedAccountId) {
-      options.stripeAccount = connectedAccountId;
-    }
-
-    const session = await stripe.checkout.sessions.create(sessionParams, options);
+    const session = connectedAccountId
+      ? await stripe.checkout.sessions.create(sessionParams, { stripeAccount: connectedAccountId })
+      : await stripe.checkout.sessions.create(sessionParams);
 
     return Response.json({ url: session.url });
   } catch (err) {
