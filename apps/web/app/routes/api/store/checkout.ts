@@ -11,29 +11,26 @@ const CheckoutSchema = z.object({
   ]),
 });
 
-const PRODUCTS: Record<
-  string,
-  { name: string; price: number; description: string }
-> = {
+const PRODUCTS: Record<string, { name: string; price: number; description: string }> = {
   'book1-signed': {
     name: 'Breeze Man vs. The Laser Sharks — Signed Copy',
     price: 1500,
-    description: 'Signed copy of Book 1',
+    description: 'Signed copy of Book 1 by Zubair Raymond Latib',
   },
   'book2-signed': {
     name: 'Breeze Man vs. The Basic Overlord — Signed Copy',
     price: 1500,
-    description: 'Signed copy of Book 2',
+    description: 'Signed copy of Book 2 by Zubair Raymond Latib',
   },
   'book3-signed': {
     name: 'Breeze Man vs. The Rizz Badger — Signed Copy',
     price: 1500,
-    description: 'Signed copy of Book 3',
+    description: 'Signed copy of Book 3 by Zubair Raymond Latib',
   },
   'classroom-pack': {
     name: 'Breeze Man Classroom Pack (5 books)',
     price: 3500,
-    description: '5 books for classroom use',
+    description: '5 books for classroom use by Zubair Raymond Latib',
   },
 };
 
@@ -44,13 +41,12 @@ export async function action({ request }: Route.ActionArgs) {
     const product = PRODUCTS[productId]!;
 
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+    const connectedAccountId = process.env.STRIPE_CONNECTED_ACCOUNT_ID;
 
-    if (!stripeSecretKey || stripeSecretKey === 'sk_test_PLACEHOLDER') {
+    if (!stripeSecretKey || stripeSecretKey.startsWith('sk_test_placeholder')) {
       return Response.json(
-        {
-          error: 'Stripe is not configured yet. Please add STRIPE_SECRET_KEY.',
-        },
-        { status: 500 },
+        { error: 'Stripe is not configured yet. Please check back soon!' },
+        { status: 503 },
       );
     }
 
@@ -59,7 +55,8 @@ export async function action({ request }: Route.ActionArgs) {
 
     const origin = new URL(request.url).origin;
 
-    const session = await stripe.checkout.sessions.create({
+    // Support both direct account and Connect connected accounts
+    const sessionParams: any = {
       mode: 'payment',
       payment_method_types: ['card'],
       shipping_address_collection: {
@@ -80,13 +77,20 @@ export async function action({ request }: Route.ActionArgs) {
       ],
       success_url: `${origin}/store?success=true`,
       cancel_url: `${origin}/store?canceled=true`,
-      metadata: {
-        productId,
-      },
-    });
+      metadata: { productId },
+    };
+
+    // If using Stripe Connect, charge on behalf of the connected account
+    const options: any = {};
+    if (connectedAccountId) {
+      options.stripeAccount = connectedAccountId;
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams, options);
 
     return Response.json({ url: session.url });
-  } catch {
+  } catch (err) {
+    console.error('Checkout error:', err);
     return Response.json(
       { error: 'Failed to create checkout session' },
       { status: 500 },
