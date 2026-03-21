@@ -8,7 +8,7 @@ export function SiteFooter() {
               BREEZE MAN BOOKS
             </h3>
             <p className="text-sm opacity-70">
-              The Brain Rot Books by Breeze Man.
+              The Brain Rot Books by Zubair Raymond Latib.
               <br />
               These aren&apos;t just books. They are a vibe.
             </p>
