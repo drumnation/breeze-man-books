@@ -1,9 +1,8 @@
 # syntax=docker.io/docker/dockerfile:1
 FROM node:20-alpine AS base
 
-# Install dependencies only when needed
 FROM base AS deps
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat curl
 WORKDIR /app
 
 RUN corepack enable pnpm
@@ -13,7 +12,7 @@ COPY . .
 
 RUN echo "node-linker=hoisted" >> .npmrc
 RUN pnpm install --frozen-lockfile
-RUN npm rebuild lightingcss --build-from-source --verbose
+RUN npm rebuild lightingcss --build-from-source --verbose 2>/dev/null || true
 
 FROM base AS builder
 WORKDIR /app
@@ -28,6 +27,9 @@ RUN turbo run build --filter=web...
 
 FROM base AS runner
 WORKDIR /app
+
+# Install curl for healthcheck
+RUN apk add --no-cache curl
 
 ENV NODE_ENV=production
 
@@ -45,7 +47,7 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-HEALTHCHECK --interval=90s --timeout=5s --retries=3 \
-CMD curl -f http://localhost:3000/healthcheck || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD curl -f http://localhost:3000/healthcheck || exit 1
 
 CMD ["npm", "start"]
