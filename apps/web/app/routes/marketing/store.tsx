@@ -40,13 +40,26 @@ export default function Store() {
             GET SIGNED COPIES
           </h1>
           <p className="mt-4 text-sm font-bold uppercase tracking-widest opacity-70">
-            Signed by the author &bull; shipped to your door
+            Signed by the author • shipped to your door
           </p>
         </div>
       </section>
 
       <section className="py-16">
         <div className="mx-auto max-w-6xl px-4">
+          <div className="mb-8 border-4 border-yellow-500 bg-yellow-50 p-4 text-center">
+            <p className="text-sm font-bold uppercase tracking-wide">
+              ⚡ Direct checkout coming soon! For now, grab your copies on{' '}
+              <a 
+                href="https://www.amazon.com/s?k=breeze+man+books" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="underline hover:no-underline"
+              >
+                Amazon
+              </a>
+            </p>
+          </div>
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
             {PRODUCTS.map((product) => (
               <ProductCard key={product.id} {...product} />
@@ -72,9 +85,11 @@ function ProductCard({
   price: number;
 }) {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleCheckout() {
     setLoading(true);
+    setError(null);
 
     try {
       const response = await fetch('/api/store/checkout', {
@@ -85,10 +100,17 @@ function ProductCard({
 
       const data = await response.json();
 
+      if (data.error) {
+        setError(data.error);
+        setLoading(false);
+        return;
+      }
+
       if (data.url) {
         window.location.href = data.url;
       }
     } catch {
+      setError('Failed to start checkout. Please try again.');
       setLoading(false);
     }
   }
@@ -105,6 +127,11 @@ function ProductCard({
         <p className="mb-4 text-xs font-bold uppercase tracking-widest opacity-50">
           {subtitle}
         </p>
+        {error && (
+          <p className="mb-2 text-xs font-bold text-red-600">
+            {error}
+          </p>
+        )}
         <div className="mt-auto">
           <p className="mb-3 text-2xl font-black">${price}</p>
           <button
