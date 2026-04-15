@@ -191,6 +191,32 @@ export default function Index() {
         </div>
       </section>
 
+      {/* WHY BUY DIRECT */}
+      <section className="border-b-4 border-black bg-neutral-100 py-12">
+        <div className="mx-auto max-w-4xl px-4 text-center">
+          <h2 className="mb-8 text-2xl font-black uppercase tracking-tighter md:text-3xl">
+            Why Buy Direct?
+          </h2>
+          <div className="grid gap-6 md:grid-cols-3">
+            <div className="border-4 border-black bg-white p-6">
+              <p className="text-3xl mb-2">✍️</p>
+              <p className="font-black uppercase tracking-tight">Signed by the Author</p>
+              <p className="mt-1 text-sm opacity-60">Every copy personally signed by Zubair Raymond Latib</p>
+            </div>
+            <div className="border-4 border-black bg-white p-6">
+              <p className="text-3xl mb-2">💰</p>
+              <p className="font-black uppercase tracking-tight">Better Bundle Value</p>
+              <p className="mt-1 text-sm opacity-60">All 3 signed for $29 — that&apos;s a deal Amazon can&apos;t match</p>
+            </div>
+            <div className="border-4 border-black bg-white p-6">
+              <p className="text-3xl mb-2">🤝</p>
+              <p className="font-black uppercase tracking-tight">Support the Creator</p>
+              <p className="mt-1 text-sm opacity-60">Buying direct puts more in the author&apos;s pocket</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* 3-BOOK BUNDLE SECTION */}
       <section
         id="bundle"
@@ -204,8 +230,8 @@ export default function Index() {
             All three books — signed — for just $29
           </p>
           <p className="mb-8 text-sm opacity-70">
-            The complete Breeze Man collection. Perfect for gifts, reading
-            groups, and anyone who needs maximum rizz on their bookshelf.
+            The complete Breeze Man collection. A signed set makes a great gift
+            for any kid who needs maximum rizz on their bookshelf.
           </p>
           <Link
             to="/store"
@@ -232,11 +258,12 @@ function BookCard({
 }) {
   return (
     <div className="flex flex-col border-4 border-black bg-white">
-      <div className="relative w-full overflow-hidden bg-neutral-100" style={{ aspectRatio: '3/4' }}>
+      {/* Container matches actual image ratio (1024×1536 = 2:3) — no gaps, no bars */}
+      <div className="relative w-full overflow-hidden bg-white" style={{ aspectRatio: '2/3' }}>
         <img
           src={cover}
           alt={title}
-          className="absolute inset-0 h-full w-full object-contain"
+          className="absolute inset-0 h-full w-full object-cover"
         />
       </div>
       <div className="flex flex-1 flex-col p-6">
@@ -253,7 +280,7 @@ function BookCard({
             rel="noopener noreferrer"
             className="block border-2 border-black bg-black py-2 text-center text-sm font-bold uppercase tracking-wide text-white transition-colors hover:bg-white hover:text-black"
           >
-            Buy on Amazon — $10
+            Get it on Amazon — $10
           </a>
           <Link
             to="/store"

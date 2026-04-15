@@ -31,7 +31,7 @@ const PRODUCTS: Record<string, { name: string; price: number; description: strin
     name: 'Breeze Man 3-Book Signed Bundle',
     price: 2900,
     description:
-      'All three signed Breeze Man books — great for gifts, reading groups, and classrooms. By Zubair Raymond Latib.',
+      'All three signed Breeze Man books — the complete collection. Signed by the author, Zubair Raymond Latib. Great for gifts.',
   },
 };
 
