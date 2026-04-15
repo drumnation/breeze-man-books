@@ -134,7 +134,7 @@ export default function Index() {
         <img
           src="/books/hero.png"
           alt="The Brain Rot Books characters"
-          className="absolute inset-0 h-full w-full object-cover opacity-40"
+          className="absolute inset-0 h-full w-full object-cover object-top opacity-40"
         />
         <div className="relative z-10 mx-auto max-w-4xl px-4 py-20 text-center">
           <h1 className="mb-6 text-5xl font-black uppercase leading-none tracking-tighter md:text-7xl lg:text-8xl">
