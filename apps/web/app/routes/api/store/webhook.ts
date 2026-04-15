@@ -65,33 +65,40 @@ Customer email: ${customerEmail}`;
 <p><strong>Ship to:</strong><br>${shippingBlock.replace(/\n/g, '<br>')}</p>
 <p><strong>Customer email:</strong> ${customerEmail}</p>`;
 
-  if (!resendApiKey) {
-    // TODO: Set RESEND_API_KEY env var to enable email notifications.
-    // Sign up at https://resend.com and create an API key.
-    // For now, log the order details so they are not lost.
-    console.log('ORDER NOTIFICATION (email not configured — set RESEND_API_KEY):', emailBody);
+  // Primary: n8n webhook (self-hosted, no external service)
+  const n8nWebhookUrl = process.env.N8N_ORDER_WEBHOOK_URL;
+  if (n8nWebhookUrl) {
+    try {
+      await fetch(n8nWebhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subject: 'New Order — Brain Rot Books', text: emailBody, html: htmlBody, to: ORDER_NOTIFICATION_EMAIL }),
+      });
+      return;
+    } catch (err) {
+      console.error('n8n webhook failed, falling back to log:', err);
+    }
+  }
+
+  // Fallback: Resend API (if configured)
+  if (resendApiKey) {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${resendApiKey}` },
+      body: JSON.stringify({
+        from: 'Brain Rot Books Orders <orders@thebrainrotbooks.com>',
+        to: [ORDER_NOTIFICATION_EMAIL],
+        subject: 'New Order — Brain Rot Books',
+        text: emailBody,
+        html: htmlBody,
+      }),
+    });
+    if (!res.ok) console.error('Resend failed:', res.status, await res.text());
     return;
   }
 
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${resendApiKey}`,
-    },
-    body: JSON.stringify({
-      from: 'Brain Rot Books Orders <orders@thebrainrotbooks.com>',
-      to: [ORDER_NOTIFICATION_EMAIL],
-      subject: `New Order — Brain Rot Books`,
-      text: emailBody,
-      html: htmlBody,
-    }),
-  });
-
-  if (!res.ok) {
-    const errorText = await res.text();
-    console.error('Failed to send order notification email:', res.status, errorText);
-  }
+  // Last resort: log so orders are never silently lost
+  console.log('ORDER NOTIFICATION (no email configured):', emailBody);
 }
 
 export async function action({ request }: Route.ActionArgs) {
