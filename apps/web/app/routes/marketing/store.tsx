@@ -23,11 +23,11 @@ const PRODUCTS = [
     price: 15,
   },
   {
-    id: 'classroom-pack',
-    title: 'Classroom Pack',
-    subtitle: '5 books for teachers',
+    id: 'bundle-3book',
+    title: '3-Book Signed Bundle',
+    subtitle: 'All three books — signed',
     cover: '/books/book1-cover.png',
-    price: 35,
+    price: 29,
   },
 ];
 
@@ -50,9 +50,9 @@ export default function Store() {
           <div className="mb-8 border-4 border-yellow-500 bg-yellow-50 p-4 text-center">
             <p className="text-sm font-bold uppercase tracking-wide">
               ⚡ Direct checkout coming soon! For now, grab your copies on{' '}
-              <a 
-                href="https://www.amazon.com/s?k=breeze+man+books" 
-                target="_blank" 
+              <a
+                href="https://www.amazon.com/s?k=breeze+man+books"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="underline hover:no-underline"
               >
@@ -128,9 +128,7 @@ function ProductCard({
           {subtitle}
         </p>
         {error && (
-          <p className="mb-2 text-xs font-bold text-red-600">
-            {error}
-          </p>
+          <p className="mb-2 text-xs font-bold text-red-600">{error}</p>
         )}
         <div className="mt-auto">
           <p className="mb-3 text-2xl font-black">${price}</p>

@@ -7,7 +7,7 @@ const CheckoutSchema = z.object({
     'book1-signed',
     'book2-signed',
     'book3-signed',
-    'classroom-pack',
+    'bundle-3book',
   ]),
 });
 
@@ -27,10 +27,11 @@ const PRODUCTS: Record<string, { name: string; price: number; description: strin
     price: 1500,
     description: 'Signed copy of Book 3 by Zubair Raymond Latib',
   },
-  'classroom-pack': {
-    name: 'Breeze Man Classroom Pack (5 books)',
-    price: 3500,
-    description: '5 books for classroom use by Zubair Raymond Latib',
+  'bundle-3book': {
+    name: 'Breeze Man 3-Book Signed Bundle',
+    price: 2900,
+    description:
+      'All three signed Breeze Man books — great for gifts, reading groups, and classrooms. By Zubair Raymond Latib.',
   },
 };
 
@@ -55,7 +56,6 @@ export async function action({ request }: Route.ActionArgs) {
 
     const origin = new URL(request.url).origin;
 
-    // Support both direct account and Connect connected accounts
     const sessionParams: any = {
       mode: 'payment',
       payment_method_types: ['card'],
@@ -82,7 +82,9 @@ export async function action({ request }: Route.ActionArgs) {
 
     // If using Stripe Connect, charge on behalf of the connected account
     const session = connectedAccountId
-      ? await stripe.checkout.sessions.create(sessionParams, { stripeAccount: connectedAccountId })
+      ? await stripe.checkout.sessions.create(sessionParams, {
+          stripeAccount: connectedAccountId,
+        })
       : await stripe.checkout.sessions.create(sessionParams);
 
     return Response.json({ url: session.url });
