@@ -236,7 +236,7 @@ function BookCard({
         <img
           src={cover}
           alt={title}
-          className="absolute inset-0 h-full w-full object-cover"
+          className="absolute inset-0 h-full w-full object-contain"
         />
       </div>
       <div className="flex flex-1 flex-col p-6">
