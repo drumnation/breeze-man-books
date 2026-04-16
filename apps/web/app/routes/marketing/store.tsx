@@ -1,5 +1,9 @@
 import { useState } from 'react';
 
+import type { Route } from '~/types/app/routes/marketing/+types/store';
+
+import { getConnectedAccountInfo } from '../api/store/_lib/stripe-connect.server';
+
 const PRODUCTS = [
   {
     id: 'book1-signed',
@@ -31,51 +35,94 @@ const PRODUCTS = [
   },
 ];
 
-export default function Store() {
+export const loader = async (_args: Route.LoaderArgs) => {
+  const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+  const connectedAccountId = process.env.STRIPE_CONNECTED_ACCOUNT_ID;
+
+  if (
+    !stripeSecretKey ||
+    stripeSecretKey.startsWith('sk_test_placeholder') ||
+    !connectedAccountId
+  ) {
+    return { merchantName: 'Breeze Man Books', checkoutEnabled: false };
+  }
+
+  const { default: Stripe } = await import('stripe');
+  const stripe = new Stripe(stripeSecretKey);
+
+  const { displayName } = await getConnectedAccountInfo(
+    stripe,
+    connectedAccountId,
+  );
+
+  return {
+    merchantName: displayName || 'Breeze Man Books',
+    checkoutEnabled: true,
+  };
+};
+
+export default function Store({ loaderData }: Route.ComponentProps) {
+  const { merchantName, checkoutEnabled } = loaderData;
+
   return (
     <div className="flex flex-col">
       <section className="border-b-4 border-black bg-black py-16 text-white">
         <div className="mx-auto max-w-4xl px-4 text-center">
-          <h1 className="text-4xl font-black uppercase tracking-tighter md:text-6xl">
+          <h1 className="text-4xl font-black tracking-tighter uppercase md:text-6xl">
             GET SIGNED COPIES
           </h1>
-          <p className="mt-4 text-sm font-bold uppercase tracking-widest opacity-70">
-            Signed by the author • shipped to your door • better value than Amazon
+          <p className="mt-4 text-sm font-bold tracking-widest uppercase opacity-70">
+            Signed by the author • shipped to your door • better value than
+            Amazon
           </p>
+          {merchantName && merchantName !== 'Breeze Man Books' && (
+            <p className="mt-2 text-xs font-bold tracking-widest uppercase opacity-50">
+              Sold by {merchantName}
+            </p>
+          )}
         </div>
       </section>
 
       <section className="py-16">
         <div className="mx-auto max-w-6xl px-4">
-          <div className="mb-8 border-4 border-yellow-500 bg-yellow-50 p-4 text-center">
-            <p className="text-sm font-bold uppercase tracking-wide">
-              ⚡ Direct checkout coming soon! For now, grab your copies on{' '}
-              <a
-                href="https://www.amazon.com/s?k=breeze+man+books"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline hover:no-underline"
-              >
-                Amazon
-              </a>{' '}
-              — or check back here for signed copies direct from the author.
-            </p>
-          </div>
+          {!checkoutEnabled && (
+            <div className="mb-8 border-4 border-yellow-500 bg-yellow-50 p-4 text-center">
+              <p className="text-sm font-bold tracking-wide uppercase">
+                ⚡ Direct checkout coming soon! For now, grab your copies on{' '}
+                <a
+                  href="https://www.amazon.com/s?k=breeze+man+books"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:no-underline"
+                >
+                  Amazon
+                </a>{' '}
+                — or check back here for signed copies direct from the author.
+              </p>
+            </div>
+          )}
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
             {PRODUCTS.map((product) => (
-              <ProductCard key={product.id} {...product} />
+              <ProductCard
+                key={product.id}
+                {...product}
+                checkoutEnabled={checkoutEnabled}
+              />
             ))}
           </div>
           <div className="mt-12 border-4 border-black bg-neutral-50 p-6 text-center">
-            <p className="text-sm font-bold uppercase tracking-widest opacity-60 mb-2">Want it on Amazon instead?</p>
-            <p className="text-sm opacity-70 mb-4">
-              No signature, but instant Prime shipping. Great if you just need a copy fast.
+            <p className="mb-2 text-sm font-bold tracking-widest uppercase opacity-60">
+              Want it on Amazon instead?
+            </p>
+            <p className="mb-4 text-sm opacity-70">
+              No signature, but instant Prime shipping. Great if you just need a
+              copy fast.
             </p>
             <a
               href="https://www.amazon.com/s?k=breeze+man+books"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block border-2 border-black px-8 py-3 text-sm font-black uppercase tracking-wide transition-colors hover:bg-black hover:text-white"
+              className="inline-block border-2 border-black px-8 py-3 text-sm font-black tracking-wide uppercase transition-colors hover:bg-black hover:text-white"
             >
               Find on Amazon
             </a>
@@ -92,12 +139,14 @@ function ProductCard({
   subtitle,
   cover,
   price,
+  checkoutEnabled,
 }: {
   id: string;
   title: string;
   subtitle: string;
   cover: string;
   price: number;
+  checkoutEnabled: boolean;
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -136,10 +185,10 @@ function ProductCard({
         <img src={cover} alt={title} className="h-56 w-auto object-contain" />
       </div>
       <div className="flex flex-1 flex-col p-5">
-        <h3 className="mb-1 text-base font-black uppercase tracking-tight">
+        <h3 className="mb-1 text-base font-black tracking-tight uppercase">
           {title}
         </h3>
-        <p className="mb-4 text-xs font-bold uppercase tracking-widest opacity-50">
+        <p className="mb-4 text-xs font-bold tracking-widest uppercase opacity-50">
           {subtitle}
         </p>
         {error && (
@@ -147,13 +196,24 @@ function ProductCard({
         )}
         <div className="mt-auto">
           <p className="mb-3 text-2xl font-black">${price}</p>
-          <button
-            onClick={handleCheckout}
-            disabled={loading}
-            className="w-full border-2 border-black bg-black py-3 text-sm font-bold uppercase tracking-wide text-white transition-colors hover:bg-white hover:text-black disabled:opacity-50"
-          >
-            {loading ? 'Loading...' : 'Buy Now'}
-          </button>
+          {checkoutEnabled ? (
+            <button
+              onClick={handleCheckout}
+              disabled={loading}
+              className="w-full border-2 border-black bg-black py-3 text-sm font-bold tracking-wide text-white uppercase transition-colors hover:bg-white hover:text-black disabled:opacity-50"
+            >
+              {loading ? 'Loading...' : 'Buy Now'}
+            </button>
+          ) : (
+            <a
+              href="https://www.amazon.com/s?k=breeze+man+books"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full border-2 border-black bg-neutral-100 py-3 text-center text-sm font-bold tracking-wide text-black uppercase transition-colors hover:bg-black hover:text-white"
+            >
+              Find on Amazon
+            </a>
+          )}
         </div>
       </div>
     </div>
