@@ -1,3 +1,5 @@
+import type Stripe from 'stripe';
+
 import { getSupabaseServerClient } from '@kit/supabase/server-client';
 
 import type { Route } from '~/types/app/routes/api/store/+types/webhook';
@@ -28,8 +30,14 @@ async function sendOrderNotificationEmail(orderDetails: {
 }) {
   const resendApiKey = process.env.RESEND_API_KEY;
 
-  const { productName, amountPaid, orderId, customerEmail, customerName, shippingAddress } =
-    orderDetails;
+  const {
+    productName,
+    amountPaid,
+    orderId,
+    customerEmail,
+    customerName,
+    shippingAddress,
+  } = orderDetails;
 
   const amountFormatted = `$${(amountPaid / 100).toFixed(2)}`;
 
@@ -72,7 +80,12 @@ Customer email: ${customerEmail}`;
       await fetch(n8nWebhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subject: 'New Order — Brain Rot Books', text: emailBody, html: htmlBody, to: ORDER_NOTIFICATION_EMAIL }),
+        body: JSON.stringify({
+          subject: 'New Order — Brain Rot Books',
+          text: emailBody,
+          html: htmlBody,
+          to: ORDER_NOTIFICATION_EMAIL,
+        }),
       });
       return;
     } catch (err) {
@@ -84,7 +97,10 @@ Customer email: ${customerEmail}`;
   if (resendApiKey) {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${resendApiKey}` },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${resendApiKey}`,
+      },
       body: JSON.stringify({
         from: 'Brain Rot Books Orders <orders@thebrainrotbooks.com>',
         to: [ORDER_NOTIFICATION_EMAIL],
@@ -101,6 +117,22 @@ Customer email: ${customerEmail}`;
   console.log('ORDER NOTIFICATION (no email configured):', emailBody);
 }
 
+/**
+ * Stripe Connect webhook note:
+ *
+ * This store uses the DESTINATION CHARGES model. The platform (Singularity Labs) creates
+ * the Checkout Session; `payment_intent_data.transfer_data.destination` routes funds to the
+ * connected account (Zuber's acct_1TMtz16CZ1cr9Dv6) after settlement.
+ *
+ * With destination charges, `checkout.session.completed` fires on the PLATFORM account, so
+ * this single webhook endpoint handles everything correctly. No separate Connect webhook
+ * endpoint is needed.
+ *
+ * If the model were ever changed to DIRECT charges (stripeAccount header), you would need:
+ * - A separate webhook registered in the Stripe Connect dashboard for the connected account
+ * - A different webhook secret (STRIPE_CONNECT_WEBHOOK_SECRET)
+ * - This endpoint checking `event.account` to distinguish platform vs. connected events
+ */
 export async function action({ request }: Route.ActionArgs) {
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -132,7 +164,9 @@ export async function action({ request }: Route.ActionArgs) {
 
     const supabase = getSupabaseServerClient(request);
 
-    const shippingDetails = session.shipping_details;
+    // In Stripe v20, shipping details moved to collected_information.shipping_details.
+    // customer_details remains at the top level.
+    const shippingDetails = session.collected_information?.shipping_details;
     const customerDetails = session.customer_details;
 
     const shippingAddress = shippingDetails?.address
@@ -151,7 +185,11 @@ export async function action({ request }: Route.ActionArgs) {
     const productId = session.metadata?.productId ?? 'unknown';
     const productName = PRODUCT_NAMES[productId] ?? productId;
 
-    await supabase.from('orders').insert({
+    // The store orders table has custom columns (book_title, buyer_name, etc.) that were
+    // added via migration 20260320000000_orders.sql. The Supabase types reflect the billing
+    // module's orders table instead — cast to bypass until `supabase:web:typegen` is re-run.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase.from as any)('orders').insert({
       book_title: productId,
       quantity: 1,
       buyer_name: buyerName,

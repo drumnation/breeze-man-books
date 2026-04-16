@@ -1,6 +1,12 @@
+import type Stripe from 'stripe';
 import { z } from 'zod';
 
 import type { Route } from '~/types/app/routes/api/store/+types/checkout';
+
+import {
+  getConnectedAccountInfo,
+  getPlatformFeeAmount,
+} from './_lib/stripe-connect.server';
 
 const CheckoutSchema = z.object({
   productId: z.enum([
@@ -11,7 +17,10 @@ const CheckoutSchema = z.object({
   ]),
 });
 
-const PRODUCTS: Record<string, { name: string; price: number; description: string }> = {
+const PRODUCTS: Record<
+  string,
+  { name: string; price: number; description: string }
+> = {
   'book1-signed': {
     name: 'Breeze Man vs. The Laser Sharks — Signed Copy',
     price: 1500,
@@ -51,12 +60,26 @@ export async function action({ request }: Route.ActionArgs) {
       );
     }
 
-    const { default: Stripe } = await import('stripe');
-    const stripe = new Stripe(stripeSecretKey);
+    const { default: StripeClient } = await import('stripe');
+    const stripe = new StripeClient(stripeSecretKey);
 
     const origin = new URL(request.url).origin;
 
-    const sessionParams: any = {
+    // Destination charges: platform creates the session, transfer_data routes funds to Zuber.
+    // application_fee_amount keeps the platform's cut before the transfer.
+    let paymentIntentData:
+      | Stripe.Checkout.SessionCreateParams['payment_intent_data']
+      | undefined;
+
+    if (connectedAccountId) {
+      const platformFee = getPlatformFeeAmount();
+      paymentIntentData = {
+        transfer_data: { destination: connectedAccountId },
+        ...(platformFee > 0 ? { application_fee_amount: platformFee } : {}),
+      };
+    }
+
+    const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: 'payment',
       payment_method_types: ['card'],
       shipping_address_collection: {
@@ -75,17 +98,24 @@ export async function action({ request }: Route.ActionArgs) {
           quantity: 1,
         },
       ],
+      ...(paymentIntentData ? { payment_intent_data: paymentIntentData } : {}),
       success_url: `${origin}/store?success=true`,
       cancel_url: `${origin}/store?canceled=true`,
       metadata: { productId },
     };
 
-    // If using Stripe Connect, charge on behalf of the connected account
-    const session = connectedAccountId
-      ? await stripe.checkout.sessions.create(sessionParams, {
-          stripeAccount: connectedAccountId,
-        })
-      : await stripe.checkout.sessions.create(sessionParams);
+    // Log the charge routing for ops visibility (no sensitive data)
+    if (connectedAccountId) {
+      const { displayName } = await getConnectedAccountInfo(
+        stripe,
+        connectedAccountId,
+      );
+      console.log(
+        `[store/checkout] destination charge → ${connectedAccountId} (${displayName}), fee=${getPlatformFeeAmount()}¢`,
+      );
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams);
 
     return Response.json({ url: session.url });
   } catch (err) {
