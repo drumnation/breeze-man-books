@@ -120,6 +120,24 @@ export async function action({ request }: Route.ActionArgs) {
     return Response.json({ url: session.url });
   } catch (err) {
     console.error('Checkout error:', err);
+
+    // Stripe Connect: the connected account hasn't been added to this platform yet.
+    // Action needed: go to Stripe Dashboard → Connect and add acct_1TMtz16CZ1cr9Dv6.
+    if (
+      err &&
+      typeof err === 'object' &&
+      'code' in err &&
+      err.code === 'account_invalid'
+    ) {
+      return Response.json(
+        {
+          error:
+            'Store checkout is being set up. Please check back soon or order on Amazon!',
+        },
+        { status: 503 },
+      );
+    }
+
     return Response.json(
       { error: 'Failed to create checkout session' },
       { status: 500 },
