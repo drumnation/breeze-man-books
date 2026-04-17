@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@kit/ui/dropdown-menu';
 import { NavigationMenu, NavigationMenuList } from '@kit/ui/navigation-menu';
+
 import { SiteNavigationItem } from './site-navigation-item';
 
 const links = {
@@ -19,6 +20,10 @@ const links = {
   Classroom: {
     label: 'Classroom',
     path: '/store#classroom',
+  },
+  About: {
+    label: 'About',
+    path: '/about',
   },
 };
 
