@@ -37,7 +37,7 @@ export default function AboutPage() {
           <img
             src="/images/zubair.webp"
             alt="Zubair Raymond Latib"
-            className="relative z-10 aspect-square w-56 rounded-full border-4 border-white object-cover object-top drop-shadow-[0_25px_25px_rgba(0,0,0,0.35)] md:w-64"
+            className="relative z-10 aspect-square w-56 rounded-full border-4 border-white bg-white object-cover object-top drop-shadow-[0_25px_25px_rgba(0,0,0,0.35)] md:w-64"
           />
         </div>
 
