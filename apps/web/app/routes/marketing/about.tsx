@@ -5,7 +5,10 @@ import { ArrowRight } from 'lucide-react';
 import { Button } from '@kit/ui/button';
 
 import { SitePageHeader } from '~/routes/marketing/_components/site-page-header';
-import { SocialLinks } from '~/routes/marketing/_components/social-links';
+import {
+  SocialLinks,
+  VERIFIED_SAME_AS_URLS,
+} from '~/routes/marketing/_components/social-links';
 import type { Route } from '~/types/app/routes/marketing/+types/about';
 
 export const meta: Route.MetaFunction = () => {
@@ -65,6 +68,7 @@ export const meta: Route.MetaFunction = () => {
           '@type': 'AdministrativeArea',
           name: 'Greater Philadelphia',
         },
+        sameAs: VERIFIED_SAME_AS_URLS,
       }),
     },
   ];
