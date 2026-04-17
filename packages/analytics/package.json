@@ -13,6 +13,10 @@
     ".": "./src/index.ts",
     "./server": "./src/server.ts"
   },
+  "dependencies": {
+    "posthog-js": "^1.250.0",
+    "posthog-node": "^4.11.0"
+  },
   "devDependencies": {
     "@kit/eslint-config": "workspace:*",
     "@kit/prettier-config": "workspace:*",
