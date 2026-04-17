@@ -73,7 +73,7 @@ export default function AboutPage() {
             Hyperacusis unlocked.
           </p>
 
-          <aside className="rounded-lg border-l-4 border-black/20 bg-black/5 px-5 py-4 text-base text-black/70 italic">
+          <aside className="rounded-lg border-t-4 border-black/20 bg-black/5 px-5 py-4 text-base text-black/70 italic">
             Hyperacusis is sensitivity to everyday sounds, usually from
             overexposure to loud noise. Check it out online if you want to know
             more. And real talk, please wear earplugs at loud sporting events,
@@ -178,7 +178,19 @@ export default function AboutPage() {
           <p className="text-xl font-bold">Zubair</p>
         </div>
 
-        <div className="mt-20 flex flex-col items-center gap-4 text-center">
+        <div className="mx-auto mt-16 max-w-xl border-t-2 border-black/10 pt-8 text-center">
+          <p className="mb-2 text-xs font-bold tracking-widest uppercase opacity-50">
+            About the Author
+          </p>
+          <p className="text-base leading-relaxed text-black/75">
+            <strong>Zubair Raymond Latib</strong> is a music educator,
+            performer, and author. He teaches students every day, performs
+            live, writes the Brain Rot Books series, and brings the books to
+            life with live readings for kids in schools.
+          </p>
+        </div>
+
+        <div className="mt-12 flex flex-col items-center gap-4 text-center">
           <h2 className="text-2xl font-semibold">Read the books</h2>
           <p className="max-w-md text-black/70">
             Signed copies direct from Zubair — no middleman, just books and a
