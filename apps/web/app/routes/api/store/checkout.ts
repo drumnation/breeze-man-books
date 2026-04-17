@@ -71,7 +71,12 @@ export async function action({ request }: Route.ActionArgs) {
       | Stripe.Checkout.SessionCreateParams['payment_intent_data']
       | undefined;
 
-    if (connectedAccountId) {
+    // Only attempt destination charge when explicitly enabled — requires the
+    // connected account to be onboarded on this platform via Stripe Connect.
+    // When disabled, charges land on the platform account directly and must
+    // be manually reconciled with the creator.
+    const connectEnabled = process.env.STRIPE_CONNECT_ENABLED === 'true';
+    if (connectEnabled && connectedAccountId) {
       const platformFee = getPlatformFeeAmount();
       paymentIntentData = {
         transfer_data: { destination: connectedAccountId },
@@ -105,13 +110,17 @@ export async function action({ request }: Route.ActionArgs) {
     };
 
     // Log the charge routing for ops visibility (no sensitive data)
-    if (connectedAccountId) {
+    if (connectEnabled && connectedAccountId) {
       const { displayName } = await getConnectedAccountInfo(
         stripe,
         connectedAccountId,
       );
       console.log(
         `[store/checkout] destination charge → ${connectedAccountId} (${displayName}), fee=${getPlatformFeeAmount()}¢`,
+      );
+    } else if (connectedAccountId) {
+      console.log(
+        `[store/checkout] direct charge to platform (Connect disabled; would-be destination: ${connectedAccountId})`,
       );
     }
 
