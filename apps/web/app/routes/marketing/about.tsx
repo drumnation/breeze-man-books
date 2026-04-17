@@ -41,7 +41,7 @@ export default function AboutPage() {
           />
         </div>
 
-        <div className="space-y-5 text-lg leading-relaxed text-black/85">
+        <div className="space-y-5 text-center text-lg leading-relaxed text-black/85">
           <p>It was one of those days, just like any other.</p>
           <p>
             I was blasting music at home, recording nonsense, and teaching
