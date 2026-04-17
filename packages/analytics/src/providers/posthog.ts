@@ -1,5 +1,3 @@
-import { PostHog as PostHogNode } from 'posthog-node';
-
 import type { AnalyticsService } from '../types';
 
 interface PostHogConfig {
@@ -8,6 +6,18 @@ interface PostHogConfig {
 }
 
 const LOG_PREFIX = '[analytics:posthog]';
+
+// posthog-node is only dynamically imported inside the server factory to keep
+// Node-only modules (path, fs) out of the client bundle. See
+// <https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility>.
+type PostHogNodeClient = {
+  capture(payload: {
+    distinctId: string;
+    event: string;
+    properties?: Record<string, unknown>;
+  }): void;
+  identify(payload: { distinctId: string; properties?: Record<string, unknown> }): void;
+};
 
 // ---------------------------------------------------------------------------
 // Client service — posthog-js lazy-loaded to minimize bundle impact
@@ -68,27 +78,26 @@ export const createPostHogClientService = (config: PostHogConfig): AnalyticsServ
 };
 
 // ---------------------------------------------------------------------------
-// Server service — posthog-node statically imported, client constructed eagerly
+// Server service — posthog-node dynamically imported during initialize()
 // ---------------------------------------------------------------------------
 
 export const createPostHogServerService = (config: PostHogConfig): AnalyticsService => {
   const isEnabled = Boolean(config.apiKey && config.apiHost);
 
-  let client: InstanceType<typeof PostHogNode> | null = null;
+  let client: PostHogNodeClient | null = null;
 
-  if (isEnabled) {
+  const initialize = async (): Promise<void> => {
+    if (!isEnabled || client) return;
     try {
-      client = new PostHogNode(config.apiKey, {
+      const mod = await import('posthog-node');
+      const Ctor = mod.PostHog;
+      client = new Ctor(config.apiKey, {
         host: config.apiHost,
         flushAt: 1,
-      });
+      }) as unknown as PostHogNodeClient;
     } catch (err) {
       console.warn(LOG_PREFIX, 'Failed to construct posthog-node client', err);
     }
-  }
-
-  const initialize = async (): Promise<void> => {
-    // Server client constructed synchronously in factory; nothing to await.
   };
 
   const trackEvent = async (
