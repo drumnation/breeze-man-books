@@ -23,17 +23,17 @@ const PRODUCTS: Record<
 > = {
   'book1-signed': {
     name: 'Breeze Man vs. The Laser Sharks — Signed Copy',
-    price: 1500,
+    price: 1200,
     description: 'Signed copy of Book 1 by Zubair Raymond Latib',
   },
   'book2-signed': {
     name: 'Breeze Man vs. The Basic Overlord — Signed Copy',
-    price: 1500,
+    price: 1200,
     description: 'Signed copy of Book 2 by Zubair Raymond Latib',
   },
   'book3-signed': {
     name: 'Breeze Man vs. The Rizz Badger — Signed Copy',
-    price: 1500,
+    price: 1200,
     description: 'Signed copy of Book 3 by Zubair Raymond Latib',
   },
   'bundle-3book': {

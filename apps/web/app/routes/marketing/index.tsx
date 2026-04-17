@@ -13,7 +13,7 @@ const BOOKS = [
     description:
       'When Laser Sharks invade the coast, only one hero has enough rizz to stop them. Breeze Man enters the chat.',
     amazon: 'https://www.amazon.com/dp/B0FHWTFPWD',
-    price: 15,
+    price: 12,
   },
   {
     id: 'book2-signed',
@@ -23,7 +23,7 @@ const BOOKS = [
     description:
       'The Basic Overlord wants to make everything mid. Breeze Man must protect the drip at all costs.',
     amazon: 'https://www.amazon.com/dp/B0FFT561TR',
-    price: 15,
+    price: 12,
   },
   {
     id: 'book3-signed',
@@ -33,7 +33,7 @@ const BOOKS = [
     description:
       'A new rival with unmatched rizz appears. Can Breeze Man out-rizz the Rizz Badger? No cap.',
     amazon: 'https://www.amazon.com/dp/B0FSZGSZNG',
-    price: 15,
+    price: 12,
   },
 ] as const;
 
