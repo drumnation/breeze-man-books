@@ -99,8 +99,8 @@ export async function action({ request }: Route.ActionArgs) {
         },
       ],
       ...(paymentIntentData ? { payment_intent_data: paymentIntentData } : {}),
-      success_url: `${origin}/store?success=true`,
-      cancel_url: `${origin}/store?canceled=true`,
+      success_url: `${origin}/?success=true`,
+      cancel_url: `${origin}/?canceled=true`,
       metadata: { productId },
     };
 

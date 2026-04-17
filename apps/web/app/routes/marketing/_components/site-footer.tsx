@@ -4,7 +4,7 @@ export function SiteFooter() {
       <div className="mx-auto max-w-6xl px-4">
         <div className="grid gap-8 md:grid-cols-3">
           <div>
-            <h3 className="mb-2 text-xl font-black uppercase tracking-tighter">
+            <h3 className="mb-2 text-xl font-black tracking-tighter uppercase">
               BREEZE MAN BOOKS
             </h3>
             <p className="text-sm opacity-70">
@@ -15,7 +15,7 @@ export function SiteFooter() {
           </div>
 
           <div>
-            <h4 className="mb-3 text-sm font-bold uppercase tracking-widest">
+            <h4 className="mb-3 text-sm font-bold tracking-widest uppercase">
               Buy on Amazon
             </h4>
             <ul className="space-y-2 text-sm opacity-70">
@@ -53,7 +53,7 @@ export function SiteFooter() {
           </div>
 
           <div>
-            <h4 className="mb-3 text-sm font-bold uppercase tracking-widest">
+            <h4 className="mb-3 text-sm font-bold tracking-widest uppercase">
               Follow the Vibe
             </h4>
             <p className="text-sm opacity-70">

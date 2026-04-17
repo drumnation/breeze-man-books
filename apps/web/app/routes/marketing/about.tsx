@@ -26,7 +26,7 @@ export default function AboutPage() {
         subtitle="By Zubair Raymond Latib"
       />
 
-      <div className="container mx-auto max-w-3xl px-4 pb-24 pt-10">
+      <div className="container mx-auto max-w-3xl px-4 pt-10 pb-24">
         <div className="relative mx-auto mb-10 flex aspect-square w-full max-w-[32rem] items-center justify-center">
           <img
             src="/images/zubair-brainrot-friends.png"
@@ -73,7 +73,7 @@ export default function AboutPage() {
             Hyperacusis unlocked.
           </p>
 
-          <aside className="rounded-lg border-l-4 border-black/20 bg-black/5 px-5 py-4 text-base italic text-black/70">
+          <aside className="rounded-lg border-l-4 border-black/20 bg-black/5 px-5 py-4 text-base text-black/70 italic">
             Hyperacusis is sensitivity to everyday sounds, usually from
             overexposure to loud noise. Check it out online if you want to know
             more. And real talk, please wear earplugs at loud sporting events,
@@ -185,8 +185,8 @@ export default function AboutPage() {
             quick hello.
           </p>
           <Button asChild size="lg">
-            <Link to="/store">
-              Browse the shop
+            <Link to="/#books">
+              Browse the books
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>

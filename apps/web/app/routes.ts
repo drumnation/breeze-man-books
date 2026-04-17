@@ -29,7 +29,6 @@ const apiRoutes = [
 
 const marketingLayout = layout('routes/marketing/layout.tsx', [
   index('routes/marketing/index.tsx'),
-  route('store', 'routes/marketing/store.tsx'),
   route('about', 'routes/marketing/about.tsx'),
   route('terms-of-service', 'routes/marketing/terms-of-service.tsx'),
   route('privacy-policy', 'routes/marketing/privacy-policy.tsx'),

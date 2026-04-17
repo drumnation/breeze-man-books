@@ -1,29 +1,43 @@
 import { useState } from 'react';
-import { Link } from 'react-router';
+
+import type { Route } from '~/types/app/routes/marketing/+types/index';
+
+import { getConnectedAccountInfo } from '../api/store/_lib/stripe-connect.server';
 
 const BOOKS = [
   {
+    id: 'book1-signed',
     title: 'Breeze Man vs. The Laser Sharks',
+    subtitle: 'Signed Copy',
     cover: '/books/book1-cover.png',
     description:
       'When Laser Sharks invade the coast, only one hero has enough rizz to stop them. Breeze Man enters the chat.',
     amazon: 'https://www.amazon.com/dp/B0FHWTFPWD',
+    price: 15,
   },
   {
+    id: 'book2-signed',
     title: 'Breeze Man vs. The Basic Overlord',
+    subtitle: 'Signed Copy',
     cover: '/books/book2-cover.png',
     description:
       'The Basic Overlord wants to make everything mid. Breeze Man must protect the drip at all costs.',
     amazon: 'https://www.amazon.com/dp/B0FFT561TR',
+    price: 15,
   },
   {
+    id: 'book3-signed',
     title: 'Breeze Man vs. The Rizz Badger',
+    subtitle: 'Signed Copy',
     cover: '/books/book3-cover.png',
     description:
       'A new rival with unmatched rizz appears. Can Breeze Man out-rizz the Rizz Badger? No cap.',
     amazon: 'https://www.amazon.com/dp/B0FSZGSZNG',
+    price: 15,
   },
-];
+] as const;
+
+type Book = (typeof BOOKS)[number];
 
 // TODO: book2-reading.mov must be transferred to /app/build/client/books/ in the container
 // and committed to public/books/ in the repo before this slide goes live.
@@ -39,6 +53,32 @@ const VIDEO_SLIDES = [
     label: 'Book 2 Reading',
   },
 ];
+
+export const loader = async (_args: Route.LoaderArgs) => {
+  const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+  const connectedAccountId = process.env.STRIPE_CONNECTED_ACCOUNT_ID;
+
+  if (
+    !stripeSecretKey ||
+    stripeSecretKey.startsWith('sk_test_placeholder') ||
+    !connectedAccountId
+  ) {
+    return { merchantName: 'Breeze Man Books', checkoutEnabled: false };
+  }
+
+  const { default: Stripe } = await import('stripe');
+  const stripe = new Stripe(stripeSecretKey);
+
+  const { displayName } = await getConnectedAccountInfo(
+    stripe,
+    connectedAccountId,
+  );
+
+  return {
+    merchantName: displayName || 'Breeze Man Books',
+    checkoutEnabled: true,
+  };
+};
 
 function VideoCarousel() {
   const [current, setCurrent] = useState(0);
@@ -82,7 +122,7 @@ function VideoCarousel() {
             controls
             preload="metadata"
             poster={s.poster}
-            className={`h-full w-full transition-opacity duration-300 ${i === current ? 'opacity-100' : 'absolute inset-0 opacity-0 pointer-events-none'}`}
+            className={`h-full w-full transition-opacity duration-300 ${i === current ? 'opacity-100' : 'pointer-events-none absolute inset-0 opacity-0'}`}
           >
             <source src={s.src} type="video/mp4" />
             Your browser does not support the video tag.
@@ -91,7 +131,7 @@ function VideoCarousel() {
       </div>
 
       {/* Label */}
-      <p className="mt-3 text-center text-xs font-bold uppercase tracking-widest opacity-50">
+      <p className="mt-3 text-center text-xs font-bold tracking-widest uppercase opacity-50">
         {slide.label}
       </p>
 
@@ -99,14 +139,14 @@ function VideoCarousel() {
       <button
         onClick={prev}
         aria-label="Previous video"
-        className="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 border-4 border-black bg-white px-3 py-2 text-lg font-black shadow-md transition-colors hover:bg-black hover:text-white"
+        className="absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 border-4 border-black bg-white px-3 py-2 text-lg font-black shadow-md transition-colors hover:bg-black hover:text-white"
       >
         ‹
       </button>
       <button
         onClick={next}
         aria-label="Next video"
-        className="absolute right-0 top-1/2 translate-x-1/2 -translate-y-1/2 border-4 border-black bg-white px-3 py-2 text-lg font-black shadow-md transition-colors hover:bg-black hover:text-white"
+        className="absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 border-4 border-black bg-white px-3 py-2 text-lg font-black shadow-md transition-colors hover:bg-black hover:text-white"
       >
         ›
       </button>
@@ -126,7 +166,9 @@ function VideoCarousel() {
   );
 }
 
-export default function Index() {
+export default function Index({ loaderData }: Route.ComponentProps) {
+  const { checkoutEnabled } = loaderData;
+
   return (
     <div className="flex flex-col">
       {/* HERO */}
@@ -137,29 +179,29 @@ export default function Index() {
           className="absolute inset-0 h-full w-full object-cover object-top opacity-40"
         />
         <div className="relative z-10 mx-auto max-w-4xl px-4 py-20 text-center">
-          <h1 className="mb-6 text-5xl font-black uppercase leading-none tracking-tighter md:text-7xl lg:text-8xl">
+          <h1 className="mb-6 text-5xl leading-none font-black tracking-tighter uppercase md:text-7xl lg:text-8xl">
             THESE AREN&apos;T JUST BOOKS.
             <br />
-            <span className="inline-block border-4 border-white px-4 py-1 mt-2">
+            <span className="mt-2 inline-block border-4 border-white px-4 py-1">
               THEY ARE A VIBE.
             </span>
           </h1>
-          <p className="mt-6 text-lg font-bold uppercase tracking-widest opacity-70">
+          <p className="mt-6 text-lg font-bold tracking-widest uppercase opacity-70">
             @thebrainrotbooks on all platforms
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <a
               href="#books"
-              className="border-2 border-white bg-white px-8 py-3 text-sm font-black uppercase tracking-wide text-black transition-colors hover:bg-transparent hover:text-white"
+              className="border-2 border-white bg-white px-8 py-3 text-sm font-black tracking-wide text-black uppercase transition-colors hover:bg-transparent hover:text-white"
             >
               See the Books
             </a>
-            <Link
-              to="/store"
-              className="border-2 border-white px-8 py-3 text-sm font-black uppercase tracking-wide transition-colors hover:bg-white hover:text-black"
+            <a
+              href="#bundle"
+              className="border-2 border-white px-8 py-3 text-sm font-black tracking-wide uppercase transition-colors hover:bg-white hover:text-black"
             >
               Get Signed Copies
-            </Link>
+            </a>
           </div>
         </div>
       </section>
@@ -167,10 +209,10 @@ export default function Index() {
       {/* VIDEO CAROUSEL SECTION */}
       <section className="border-b-4 border-black bg-white py-16">
         <div className="mx-auto max-w-4xl px-4 text-center">
-          <h2 className="mb-2 text-3xl font-black uppercase tracking-tighter md:text-4xl">
+          <h2 className="mb-2 text-3xl font-black tracking-tighter uppercase md:text-4xl">
             Watch Breeze Man in Action
           </h2>
-          <p className="mb-8 text-sm font-bold uppercase tracking-widest opacity-50">
+          <p className="mb-8 text-sm font-bold tracking-widest uppercase opacity-50">
             Story readings from the series
           </p>
           <VideoCarousel />
@@ -180,12 +222,16 @@ export default function Index() {
       {/* BOOKS SECTION */}
       <section id="books" className="border-b-4 border-black bg-white py-16">
         <div className="mx-auto max-w-6xl px-4">
-          <h2 className="mb-12 text-center text-4xl font-black uppercase tracking-tighter md:text-5xl">
+          <h2 className="mb-12 text-center text-4xl font-black tracking-tighter uppercase md:text-5xl">
             THE BRAIN ROT BOOKS
           </h2>
           <div className="grid gap-8 md:grid-cols-3">
             {BOOKS.map((book) => (
-              <BookCard key={book.title} {...book} />
+              <BookCard
+                key={book.id}
+                {...book}
+                checkoutEnabled={checkoutEnabled}
+              />
             ))}
           </div>
         </div>
@@ -194,24 +240,37 @@ export default function Index() {
       {/* WHY BUY DIRECT */}
       <section className="border-b-4 border-black bg-neutral-100 py-12">
         <div className="mx-auto max-w-4xl px-4 text-center">
-          <h2 className="mb-8 text-2xl font-black uppercase tracking-tighter md:text-3xl">
+          <h2 className="mb-8 text-2xl font-black tracking-tighter uppercase md:text-3xl">
             Why Buy Direct?
           </h2>
           <div className="grid gap-6 md:grid-cols-3">
             <div className="border-4 border-black bg-white p-6">
-              <p className="text-3xl mb-2">✍️</p>
-              <p className="font-black uppercase tracking-tight">Signed by the Author</p>
-              <p className="mt-1 text-sm opacity-60">Every copy personally signed by Zubair Raymond Latib</p>
+              <p className="mb-2 text-3xl">✍️</p>
+              <p className="font-black tracking-tight uppercase">
+                Signed by the Author
+              </p>
+              <p className="mt-1 text-sm opacity-60">
+                Every copy personally signed by Zubair Raymond Latib
+              </p>
             </div>
             <div className="border-4 border-black bg-white p-6">
-              <p className="text-3xl mb-2">💰</p>
-              <p className="font-black uppercase tracking-tight">Better Bundle Value</p>
-              <p className="mt-1 text-sm opacity-60">All 3 signed for $29 — that&apos;s a deal Amazon can&apos;t match</p>
+              <p className="mb-2 text-3xl">💰</p>
+              <p className="font-black tracking-tight uppercase">
+                Better Bundle Value
+              </p>
+              <p className="mt-1 text-sm opacity-60">
+                All 3 signed for $29 — that&apos;s a deal Amazon can&apos;t
+                match
+              </p>
             </div>
             <div className="border-4 border-black bg-white p-6">
-              <p className="text-3xl mb-2">🤝</p>
-              <p className="font-black uppercase tracking-tight">Support the Creator</p>
-              <p className="mt-1 text-sm opacity-60">Buying direct puts more in the author&apos;s pocket</p>
+              <p className="mb-2 text-3xl">🤝</p>
+              <p className="font-black tracking-tight uppercase">
+                Support the Creator
+              </p>
+              <p className="mt-1 text-sm opacity-60">
+                Buying direct puts more in the author&apos;s pocket
+              </p>
             </div>
           </div>
         </div>
@@ -223,7 +282,7 @@ export default function Index() {
         className="border-b-4 border-black bg-black py-16 text-white"
       >
         <div className="mx-auto max-w-3xl px-4 text-center">
-          <h2 className="mb-4 text-4xl font-black uppercase tracking-tighter md:text-5xl">
+          <h2 className="mb-4 text-4xl font-black tracking-tighter uppercase md:text-5xl">
             3-BOOK SIGNED BUNDLE
           </h2>
           <p className="mb-2 text-lg font-bold">
@@ -233,33 +292,120 @@ export default function Index() {
             The complete Breeze Man collection. A signed set makes a great gift
             for any kid who needs maximum rizz on their bookshelf.
           </p>
-          <Link
-            to="/store"
-            className="inline-block border-2 border-white bg-white px-10 py-4 text-sm font-black uppercase tracking-wide text-black transition-colors hover:bg-transparent hover:text-white"
-          >
-            Get the Bundle — $29
-          </Link>
+          <BundleCta checkoutEnabled={checkoutEnabled} />
         </div>
       </section>
     </div>
   );
 }
 
+function BundleCta({ checkoutEnabled }: { checkoutEnabled: boolean }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleCheckout() {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/store/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId: 'bundle-3book' }),
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        setError(data.error);
+        setLoading(false);
+        return;
+      }
+
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch {
+      setError('Failed to start checkout. Please try again.');
+      setLoading(false);
+    }
+  }
+
+  if (!checkoutEnabled) {
+    return (
+      <a
+        href="https://www.amazon.com/s?k=breeze+man+books"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-block border-2 border-white bg-white px-10 py-4 text-sm font-black tracking-wide text-black uppercase transition-colors hover:bg-transparent hover:text-white"
+      >
+        Find on Amazon
+      </a>
+    );
+  }
+
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <button
+        onClick={handleCheckout}
+        disabled={loading}
+        className="inline-block border-2 border-white bg-white px-10 py-4 text-sm font-black tracking-wide text-black uppercase transition-colors hover:bg-transparent hover:text-white disabled:opacity-50"
+      >
+        {loading ? 'Loading...' : 'Get the Bundle — $29'}
+      </button>
+      {error && <p className="text-xs font-bold text-red-300">{error}</p>}
+    </div>
+  );
+}
+
 function BookCard({
+  id,
   title,
+  subtitle,
   cover,
   description,
   amazon,
-}: {
-  title: string;
-  cover: string;
-  description: string;
-  amazon: string;
-}) {
+  price,
+  checkoutEnabled,
+}: Book & { checkoutEnabled: boolean }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleCheckout() {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/store/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId: id }),
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        setError(data.error);
+        setLoading(false);
+        return;
+      }
+
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch {
+      setError('Failed to start checkout. Please try again.');
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="flex flex-col border-4 border-black bg-white">
       {/* Container matches actual image ratio (1024×1536 = 2:3) — no gaps, no bars */}
-      <div className="relative w-full overflow-hidden bg-white" style={{ aspectRatio: '2/3' }}>
+      <div
+        className="relative w-full overflow-hidden bg-white"
+        style={{ aspectRatio: '2/3' }}
+      >
         <img
           src={cover}
           alt={title}
@@ -267,28 +413,46 @@ function BookCard({
         />
       </div>
       <div className="flex flex-1 flex-col p-6">
-        <h3 className="mb-2 text-lg font-black uppercase tracking-tight">
+        <h3 className="mb-1 text-lg font-black tracking-tight uppercase">
           {title}
         </h3>
+        <p className="mb-2 text-xs font-bold tracking-widest uppercase opacity-50">
+          {subtitle}
+        </p>
         <p className="mb-6 flex-1 text-sm leading-relaxed opacity-70">
           {description}
         </p>
-        <div className="flex flex-col gap-2">
+        {error && (
+          <p className="mb-2 text-xs font-bold text-red-600">{error}</p>
+        )}
+        {checkoutEnabled ? (
+          <div className="flex flex-col gap-2">
+            <button
+              onClick={handleCheckout}
+              disabled={loading}
+              className="block w-full border-2 border-black bg-black py-3 text-center text-sm font-bold tracking-wide text-white uppercase transition-colors hover:bg-white hover:text-black disabled:opacity-50"
+            >
+              {loading ? 'Loading...' : `Buy Signed Copy — $${price}`}
+            </button>
+            <a
+              href={amazon}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block text-center text-xs font-bold tracking-wide uppercase underline opacity-60 hover:opacity-100"
+            >
+              Also on Amazon
+            </a>
+          </div>
+        ) : (
           <a
             href={amazon}
             target="_blank"
             rel="noopener noreferrer"
-            className="block border-2 border-black bg-black py-2 text-center text-sm font-bold uppercase tracking-wide text-white transition-colors hover:bg-white hover:text-black"
+            className="block w-full border-2 border-black bg-black py-3 text-center text-sm font-bold tracking-wide text-white uppercase transition-colors hover:bg-white hover:text-black"
           >
-            Get it on Amazon — $10
+            Find on Amazon — $10
           </a>
-          <Link
-            to="/store"
-            className="block border-2 border-black py-2 text-center text-sm font-bold uppercase tracking-wide transition-colors hover:bg-black hover:text-white"
-          >
-            Get Signed Copy — $15
-          </Link>
-        </div>
+        )}
       </div>
     </div>
   );

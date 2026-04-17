@@ -18,7 +18,7 @@ export function AppLogo({
       prefetch={'viewport'}
       className={cn('flex items-center gap-2', className)}
     >
-      <span className="font-heading text-lg font-black uppercase tracking-tighter whitespace-nowrap">
+      <span className="font-heading text-lg font-black tracking-tighter whitespace-nowrap uppercase">
         THE BRAIN ROT BOOKS
       </span>
     </Link>

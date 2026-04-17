@@ -15,11 +15,7 @@ import { SiteNavigationItem } from './site-navigation-item';
 const links = {
   Books: {
     label: 'Books',
-    path: '/store',
-  },
-  Classroom: {
-    label: 'Classroom',
-    path: '/store#classroom',
+    path: '/#books',
   },
   About: {
     label: 'About',
