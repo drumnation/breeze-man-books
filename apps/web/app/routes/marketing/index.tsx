@@ -3,6 +3,7 @@ import { useState } from 'react';
 import type { Route } from '~/types/app/routes/marketing/+types/index';
 
 import { getConnectedAccountInfo } from '../api/store/_lib/stripe-connect.server';
+import { SocialLinks } from './_components/social-links';
 
 const BOOKS = [
   {
@@ -189,6 +190,9 @@ export default function Index({ loaderData }: Route.ComponentProps) {
           <p className="mt-6 text-lg font-bold tracking-widest uppercase opacity-70">
             @thebrainrotbooks on all platforms
           </p>
+          <div className="mt-5">
+            <SocialLinks size="lg" tone="dark" />
+          </div>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <a
               href="#books"

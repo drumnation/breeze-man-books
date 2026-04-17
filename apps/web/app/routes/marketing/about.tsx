@@ -5,6 +5,7 @@ import { ArrowRight } from 'lucide-react';
 import { Button } from '@kit/ui/button';
 
 import { SitePageHeader } from '~/routes/marketing/_components/site-page-header';
+import { SocialLinks } from '~/routes/marketing/_components/social-links';
 import type { Route } from '~/types/app/routes/marketing/+types/about';
 
 export const meta: Route.MetaFunction = () => {
@@ -251,6 +252,12 @@ export default function AboutPage() {
               Get in touch.
             </a>
           </p>
+          <div className="mt-6">
+            <p className="mb-3 text-xs font-bold tracking-widest uppercase text-black/50">
+              Follow the Vibe
+            </p>
+            <SocialLinks size="md" tone="light" includePersonal />
+          </div>
         </div>
 
         <div className="mt-12 flex flex-col items-center gap-4 text-center">

@@ -1,3 +1,5 @@
+import { SocialLinks } from './social-links';
+
 export function SiteFooter() {
   return (
     <footer className="border-t-4 border-black bg-black py-12 text-white">
@@ -56,9 +58,10 @@ export function SiteFooter() {
             <h4 className="mb-3 text-sm font-bold tracking-widest uppercase">
               Follow the Vibe
             </h4>
-            <p className="text-sm opacity-70">
+            <p className="mb-3 text-sm opacity-70">
               @thebrainrotbooks on all platforms
             </p>
+            <SocialLinks size="sm" tone="dark" className="justify-start" />
           </div>
         </div>
 
