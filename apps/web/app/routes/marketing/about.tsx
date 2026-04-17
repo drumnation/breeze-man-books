@@ -9,11 +9,62 @@ import type { Route } from '~/types/app/routes/marketing/+types/about';
 
 export const meta: Route.MetaFunction = () => {
   return [
-    { title: 'Origin Story of the Brain Rot Books — Zubair Raymond Latib' },
+    {
+      title:
+        'Zubair Raymond Latib — Author, Music Educator & School Performer (Philadelphia, PA Suburbs)',
+    },
     {
       name: 'description',
       content:
-        'The origin story of the Brain Rot Books — hyperacusis, full-send chaos, and a third-grade classroom of legends. By Zubair Raymond Latib.',
+        'Zubair Raymond Latib is a music educator, performer, and author of the Brain Rot Books, based in the Philadelphia, PA suburbs. Live readings and school performances across Greater Philadelphia.',
+    },
+    {
+      name: 'keywords',
+      content:
+        "Zubair Raymond Latib, Brain Rot Books, Breeze Man Books, Philadelphia music educator, Philadelphia suburbs author, school visits Philadelphia, children's book author Pennsylvania, live school readings PA",
+    },
+    {
+      property: 'og:type',
+      content: 'profile',
+    },
+    {
+      property: 'og:locale',
+      content: 'en_US',
+    },
+    {
+      tagName: 'script',
+      type: 'application/ld+json',
+      children: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Person',
+        name: 'Zubair Raymond Latib',
+        jobTitle: 'Music Educator, Performer, and Author',
+        description:
+          'Music educator, live performer, and author of the Brain Rot Books. Performs live readings for kids in schools across the Philadelphia region.',
+        url: 'https://thebrainrotbooks.com/about',
+        image: 'https://thebrainrotbooks.com/images/zubair.webp',
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: 'Philadelphia Suburbs',
+          addressRegion: 'PA',
+          addressCountry: 'US',
+        },
+        worksFor: {
+          '@type': 'Organization',
+          name: 'Brain Rot Books',
+          url: 'https://thebrainrotbooks.com',
+        },
+        knowsAbout: [
+          'Music Education',
+          "Children's Literature",
+          'Live School Performances',
+          'Author Visits',
+        ],
+        areaServed: {
+          '@type': 'AdministrativeArea',
+          name: 'Greater Philadelphia',
+        },
+      }),
     },
   ];
 };
@@ -184,9 +235,21 @@ export default function AboutPage() {
           </p>
           <p className="text-base leading-relaxed text-black/75">
             <strong>Zubair Raymond Latib</strong> is a music educator,
-            performer, and author. He teaches students every day, performs
-            live, writes the Brain Rot Books series, and brings the books to
-            life with live readings for kids in schools.
+            performer, and author based in the{' '}
+            <strong>Philadelphia, PA suburbs</strong>. He teaches students
+            every day, performs live, writes the Brain Rot Books series, and
+            brings the books to life with live readings for kids in schools
+            across the Greater Philadelphia region.
+          </p>
+          <p className="mt-4 text-sm text-black/55">
+            Looking to bring a live Brain Rot Books reading to your
+            Philadelphia-area school or event?{' '}
+            <a
+              href="mailto:hello@thebrainrotbooks.com"
+              className="underline hover:text-black"
+            >
+              Get in touch.
+            </a>
           </p>
         </div>
 
