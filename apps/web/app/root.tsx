@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+
 import {
   Links,
   Meta,
@@ -5,6 +7,7 @@ import {
   Scripts,
   ScrollRestoration,
   data,
+  useLocation,
 } from 'react-router';
 
 import { z } from 'zod';
@@ -12,6 +15,8 @@ import { z } from 'zod';
 import { CsrfTokenMeta } from '@kit/csrf/client';
 import { createCsrfProtect } from '@kit/csrf/server';
 import { cn } from '@kit/ui/utils';
+
+import { analytics } from '@kit/analytics';
 
 import { RootErrorBoundary } from '~/components/root-error-boundary';
 import { RootHead } from '~/components/root-head';
@@ -63,6 +68,18 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 export default function App(props: Route.ComponentProps) {
   const { language, className, theme, csrfToken } = props.loaderData ?? {};
+  const location = useLocation();
+
+  useEffect(function initAnalytics() {
+    void analytics.initialize();
+  }, []);
+
+  useEffect(
+    function trackNavigation() {
+      void analytics.trackPageView(location.pathname);
+    },
+    [location.pathname],
+  );
 
   return (
     <html lang={language} className={className}>
