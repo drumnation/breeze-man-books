@@ -5,7 +5,9 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 import tailwindCssVitePlugin from '@kit/tailwind-config/vite';
 
 const ALLOWED_HOSTS =
-  process.env.NODE_ENV === 'development' ? ['host.docker.internal'] : [];
+  process.env.NODE_ENV === 'development'
+    ? ['host.docker.internal', '.brain-garden.io']
+    : [];
 
 export default defineConfig(({ command }) => ({
   ssr: {
