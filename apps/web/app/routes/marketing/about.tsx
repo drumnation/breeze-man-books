@@ -27,11 +27,17 @@ export default function AboutPage() {
       />
 
       <div className="container mx-auto max-w-3xl px-4 pb-24 pt-10">
-        <div className="relative mx-auto mb-10 flex justify-center">
+        <div className="relative mx-auto mb-10 flex aspect-square w-full max-w-[32rem] items-center justify-center">
+          <img
+            src="/images/zubair-brainrot-friends.png"
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 z-0 h-full w-full object-contain opacity-95"
+          />
           <img
             src="/images/zubair.webp"
             alt="Zubair Raymond Latib"
-            className="relative z-10 h-auto w-64 drop-shadow-[0_25px_25px_rgba(0,0,0,0.35)] md:w-80"
+            className="relative z-10 h-auto w-56 drop-shadow-[0_25px_25px_rgba(0,0,0,0.35)] md:w-64"
           />
         </div>
 
