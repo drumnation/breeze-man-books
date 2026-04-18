@@ -47,6 +47,8 @@ export function createAnalyticsManager<T extends string, Config extends object>(
   registerActiveServices(options);
 
   return {
+    initialize: () => Promise.resolve(),
+
     addProvider: (provider: T, config: Config) => {
       const factory = options.providers[provider];
 
