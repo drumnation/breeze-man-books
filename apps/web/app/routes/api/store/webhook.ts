@@ -182,31 +182,36 @@ export async function action({ request }: Route.ActionArgs) {
 
     const buyerName = shippingDetails?.name ?? customerDetails?.name ?? '';
     const buyerEmail = customerDetails?.email ?? '';
+    const buyerAddressJson =
+      customerDetails?.address ?? shippingDetails?.address ?? null;
     const productId = session.metadata?.productId ?? 'unknown';
     const productName = PRODUCT_NAMES[productId] ?? productId;
 
-    // The store orders table has custom columns (book_title, buyer_name, etc.) that were
-    // added via migration 20260320000000_orders.sql. The Supabase types reflect the billing
-    // module's orders table instead — cast to bypass until `supabase:web:typegen` is re-run.
+    // Insert into `store_orders` (custom Breeze Man Books table) — NOT the
+    // Makerkit `public.orders` table which belongs to the billing schema.
+    // See migration 20260422000000_store_orders.sql. Generated Supabase types
+    // will include store_orders after `pnpm supabase:web:typegen` is re-run
+    // against the updated schema; until then we scope an `as any` to `.from()`
+    // only so the insert payload itself remains plain-typed.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase.from as any)('orders').insert({
-      book_title: productId,
-      quantity: 1,
-      buyer_name: buyerName,
-      buyer_email: buyerEmail,
-      buyer_address: shippingAddress
-        ? [
-            shippingAddress.line1,
-            shippingAddress.line2,
-            `${shippingAddress.city}, ${shippingAddress.state} ${shippingAddress.postalCode}`,
-            shippingAddress.country,
-          ]
-            .filter(Boolean)
-            .join(', ')
-        : '',
+    const storeOrders = (supabase.from as any)('store_orders') as {
+      insert: (row: Record<string, unknown>) => Promise<{ error: unknown }>;
+    };
+    const { error: insertError } = await storeOrders.insert({
       stripe_session_id: session.id,
-      status: 'pending',
+      book_title: productName,
+      quantity: 1,
+      amount_total: session.amount_total ?? 0,
+      currency: session.currency ?? 'usd',
+      buyer_name: buyerName || null,
+      buyer_email: buyerEmail || null,
+      buyer_address: buyerAddressJson,
+      status: 'paid',
     });
+
+    if (insertError) {
+      console.error('store_orders insert failed:', insertError);
+    }
 
     await sendOrderNotificationEmail({
       productName,
