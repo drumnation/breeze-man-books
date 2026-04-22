@@ -2,6 +2,8 @@ import type Stripe from 'stripe';
 
 import { getSupabaseServerClient } from '@kit/supabase/server-client';
 
+import { renderNewOrderNotificationEmail } from '@kit/email-templates';
+
 import type { Route } from '~/types/app/routes/api/store/+types/webhook';
 
 const ORDER_NOTIFICATION_EMAIL = 'orders@thebrainrotbooks.com';
@@ -41,6 +43,7 @@ async function sendOrderNotificationEmail(orderDetails: {
 
   const amountFormatted = `$${(amountPaid / 100).toFixed(2)}`;
 
+  // Plain-text fallback for n8n webhook and logging
   const shippingBlock = shippingAddress
     ? [
         customerName,
@@ -53,25 +56,17 @@ async function sendOrderNotificationEmail(orderDetails: {
         .join('\n')
     : 'No shipping address captured';
 
-  const emailBody = `New order received!
+  const emailBody = `New order received!\n\nProduct: ${productName}\nAmount: ${amountFormatted}\nOrder ID: ${orderId}\n\nShip to:\n${shippingBlock}\n\nCustomer email: ${customerEmail}`;
 
-Product: ${productName}
-Amount: ${amountFormatted}
-Order ID: ${orderId}
-
-Ship to:
-${shippingBlock}
-
-Customer email: ${customerEmail}`;
-
-  const htmlBody = `<p>New order received!</p>
-<table>
-  <tr><td><strong>Product:</strong></td><td>${productName}</td></tr>
-  <tr><td><strong>Amount:</strong></td><td>${amountFormatted}</td></tr>
-  <tr><td><strong>Order ID:</strong></td><td>${orderId}</td></tr>
-</table>
-<p><strong>Ship to:</strong><br>${shippingBlock.replace(/\n/g, '<br>')}</p>
-<p><strong>Customer email:</strong> ${customerEmail}</p>`;
+  // Render the branded HTML template
+  const { html: htmlBody, subject } = await renderNewOrderNotificationEmail({
+    productName,
+    amountPaid: amountFormatted,
+    orderId,
+    customerEmail,
+    customerName,
+    shippingAddress,
+  });
 
   // Primary: n8n webhook (self-hosted, no external service)
   const n8nWebhookUrl = process.env.N8N_ORDER_WEBHOOK_URL;
@@ -81,7 +76,7 @@ Customer email: ${customerEmail}`;
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          subject: 'New Order — Brain Rot Books',
+          subject,
           text: emailBody,
           html: htmlBody,
           to: ORDER_NOTIFICATION_EMAIL,
@@ -104,7 +99,7 @@ Customer email: ${customerEmail}`;
       body: JSON.stringify({
         from: 'Brain Rot Books Orders <orders@thebrainrotbooks.com>',
         to: [ORDER_NOTIFICATION_EMAIL],
-        subject: 'New Order — Brain Rot Books',
+        subject,
         text: emailBody,
         html: htmlBody,
       }),
