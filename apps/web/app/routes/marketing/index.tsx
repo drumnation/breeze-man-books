@@ -2,7 +2,6 @@ import { useState } from 'react';
 
 import type { Route } from '~/types/app/routes/marketing/+types/index';
 
-import { getConnectedAccountInfo } from '../api/store/_lib/stripe-connect.server';
 import { SocialLinks } from './_components/social-links';
 
 const BOOKS = [
@@ -57,27 +56,13 @@ const VIDEO_SLIDES = [
 
 export const loader = async (_args: Route.LoaderArgs) => {
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-  const connectedAccountId = process.env.STRIPE_CONNECTED_ACCOUNT_ID;
 
-  if (
-    !stripeSecretKey ||
-    stripeSecretKey.startsWith('sk_test_placeholder') ||
-    !connectedAccountId
-  ) {
-    return { merchantName: 'Breeze Man Books', checkoutEnabled: false };
-  }
-
-  const { default: Stripe } = await import('stripe');
-  const stripe = new Stripe(stripeSecretKey);
-
-  const { displayName } = await getConnectedAccountInfo(
-    stripe,
-    connectedAccountId,
-  );
+  const checkoutEnabled =
+    !!stripeSecretKey && !stripeSecretKey.startsWith('sk_test_placeholder');
 
   return {
-    merchantName: displayName || 'Breeze Man Books',
-    checkoutEnabled: true,
+    merchantName: 'Breeze Man Books',
+    checkoutEnabled,
   };
 };
 
