@@ -118,20 +118,12 @@ Customer email: ${customerEmail}`;
 }
 
 /**
- * Stripe Connect webhook note:
+ * Stripe webhook: direct charges to the Singularity Labs platform account.
  *
- * This store uses the DESTINATION CHARGES model. The platform (Singularity Labs) creates
- * the Checkout Session; `payment_intent_data.transfer_data.destination` routes funds to the
- * connected account (Zuber's acct_1TMtz16CZ1cr9Dv6) after settlement.
- *
- * With destination charges, `checkout.session.completed` fires on the PLATFORM account, so
- * this single webhook endpoint handles everything correctly. No separate Connect webhook
- * endpoint is needed.
- *
- * If the model were ever changed to DIRECT charges (stripeAccount header), you would need:
- * - A separate webhook registered in the Stripe Connect dashboard for the connected account
- * - A different webhook secret (STRIPE_CONNECT_WEBHOOK_SECRET)
- * - This endpoint checking `event.account` to distinguish platform vs. connected events
+ * All checkouts land on the platform Stripe account; there are no connected accounts or
+ * transfer_data routing. `checkout.session.completed` fires on the platform account, so a
+ * single webhook endpoint with `STRIPE_WEBHOOK_SECRET` is all that's needed. Settlement
+ * with the book author is handled manually outside Stripe.
  */
 export async function action({ request }: Route.ActionArgs) {
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;

@@ -3,11 +3,6 @@ import { z } from 'zod';
 
 import type { Route } from '~/types/app/routes/api/store/+types/checkout';
 
-import {
-  getConnectedAccountInfo,
-  getPlatformFeeAmount,
-} from './_lib/stripe-connect.server';
-
 const CheckoutSchema = z.object({
   productId: z.enum([
     'book1-signed',
@@ -51,7 +46,6 @@ export async function action({ request }: Route.ActionArgs) {
     const product = PRODUCTS[productId]!;
 
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-    const connectedAccountId = process.env.STRIPE_CONNECTED_ACCOUNT_ID;
 
     if (!stripeSecretKey || stripeSecretKey.startsWith('sk_test_placeholder')) {
       return Response.json(
@@ -65,25 +59,8 @@ export async function action({ request }: Route.ActionArgs) {
 
     const origin = new URL(request.url).origin;
 
-    // Destination charges: platform creates the session, transfer_data routes funds to Zuber.
-    // application_fee_amount keeps the platform's cut before the transfer.
-    let paymentIntentData:
-      | Stripe.Checkout.SessionCreateParams['payment_intent_data']
-      | undefined;
-
-    // Only attempt destination charge when explicitly enabled — requires the
-    // connected account to be onboarded on this platform via Stripe Connect.
-    // When disabled, charges land on the platform account directly and must
-    // be manually reconciled with the creator.
-    const connectEnabled = process.env.STRIPE_CONNECT_ENABLED === 'true';
-    if (connectEnabled && connectedAccountId) {
-      const platformFee = getPlatformFeeAmount();
-      paymentIntentData = {
-        transfer_data: { destination: connectedAccountId },
-        ...(platformFee > 0 ? { application_fee_amount: platformFee } : {}),
-      };
-    }
-
+    // Direct charges: Singularity Labs is the merchant of record. All funds land on the
+    // platform Stripe account. Settlement with the author is handled manually outside Stripe.
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: 'payment',
       payment_method_types: ['card'],
@@ -103,49 +80,20 @@ export async function action({ request }: Route.ActionArgs) {
           quantity: 1,
         },
       ],
-      ...(paymentIntentData ? { payment_intent_data: paymentIntentData } : {}),
       success_url: `${origin}/?success=true`,
       cancel_url: `${origin}/?canceled=true`,
       metadata: { productId },
     };
 
-    // Log the charge routing for ops visibility (no sensitive data)
-    if (connectEnabled && connectedAccountId) {
-      const { displayName } = await getConnectedAccountInfo(
-        stripe,
-        connectedAccountId,
-      );
-      console.log(
-        `[store/checkout] destination charge → ${connectedAccountId} (${displayName}), fee=${getPlatformFeeAmount()}¢`,
-      );
-    } else if (connectedAccountId) {
-      console.log(
-        `[store/checkout] direct charge to platform (Connect disabled; would-be destination: ${connectedAccountId})`,
-      );
-    }
+    console.log(
+      `[store/checkout] direct charge to platform (product=${productId})`,
+    );
 
     const session = await stripe.checkout.sessions.create(sessionParams);
 
     return Response.json({ url: session.url });
   } catch (err) {
     console.error('Checkout error:', err);
-
-    // Stripe Connect: the connected account hasn't been added to this platform yet.
-    // Action needed: go to Stripe Dashboard → Connect and add acct_1TMtz16CZ1cr9Dv6.
-    if (
-      err &&
-      typeof err === 'object' &&
-      'code' in err &&
-      err.code === 'account_invalid'
-    ) {
-      return Response.json(
-        {
-          error:
-            'Store checkout is being set up. Please check back soon or order on Amazon!',
-        },
-        { status: 503 },
-      );
-    }
 
     return Response.json(
       { error: 'Failed to create checkout session' },
