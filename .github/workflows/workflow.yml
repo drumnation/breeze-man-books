@@ -2,8 +2,22 @@ name: Workflow
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+      - '.gitignore'
+      - 'LICENSE'
+      - '.handoffs/**'
+      - '.grove/**'
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+      - '.gitignore'
+      - 'LICENSE'
+      - '.handoffs/**'
+      - '.grove/**'
 jobs:
   typescript:
     name: ʦ TypeScript
