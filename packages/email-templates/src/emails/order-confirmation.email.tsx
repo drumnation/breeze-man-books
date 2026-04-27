@@ -95,7 +95,7 @@ export async function renderOrderConfirmationEmail(props: Props) {
                 letterSpacing: '2px',
                 textTransform: 'uppercase',
               }}>
-                These Are Just Books. They Are A Vibe.
+                These Are Not Just Books. They Are A Vibe.
               </Text>
             </Section>
 
@@ -153,7 +153,7 @@ export async function renderOrderConfirmationEmail(props: Props) {
                 lineHeight: 1.6,
                 margin: 0,
               }}>
-                Your order is locked in. Brendan is suiting up and your books are
+                Your order is locked in. Zubair is suiting up and your books are
                 getting ready to ship. Here's the rundown:
               </Text>
             </Section>
@@ -374,7 +374,7 @@ export async function renderOrderConfirmationEmail(props: Props) {
                 color: '#cccccc',
                 margin: '16px 0 0 0',
               }}>
-                Brain Rot Books by Brendan · thebrainrotbooks.com
+                The Brain Rot Books by Zubair Raymond Latib · thebrainrotbooks.com
               </Text>
             </Section>
 

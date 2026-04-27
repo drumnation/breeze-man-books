@@ -2,11 +2,15 @@ import type Stripe from 'stripe';
 
 import { getSupabaseServerClient } from '@kit/supabase/server-client';
 
-import { renderNewOrderNotificationEmail } from '@kit/email-templates';
+import {
+  renderNewOrderNotificationEmail,
+  renderOrderConfirmationEmail,
+} from '@kit/email-templates';
 
 import type { Route } from '~/types/app/routes/api/store/+types/webhook';
 
 const ORDER_NOTIFICATION_EMAIL = 'orders@thebrainrotbooks.com';
+const ORDER_EMAIL_FROM = 'thebrainrotbooks <orders@thebrainrotbooks.com>';
 
 const PRODUCT_NAMES: Record<string, string> = {
   'book1-signed': 'Breeze Man vs. The Laser Sharks — Signed Copy',
@@ -14,6 +18,64 @@ const PRODUCT_NAMES: Record<string, string> = {
   'book3-signed': 'Breeze Man vs. The Rizz Badger — Signed Copy',
   'bundle-3book': 'Breeze Man 3-Book Signed Bundle',
 };
+
+async function sendStoreEmail(message: {
+  to: string;
+  subject: string;
+  text: string;
+  html: string;
+}) {
+  const payload = {
+    from: ORDER_EMAIL_FROM,
+    ...message,
+  };
+
+  const resendApiKey = process.env.RESEND_API_KEY;
+
+  // Primary: n8n webhook (self-hosted, no external service)
+  const n8nWebhookUrl = process.env.N8N_ORDER_WEBHOOK_URL;
+  if (n8nWebhookUrl) {
+    try {
+      const res = await fetch(n8nWebhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        return;
+      }
+
+      console.error('n8n webhook failed:', res.status, await res.text());
+    } catch (err) {
+      console.error('n8n webhook failed, falling back to Resend:', err);
+    }
+  }
+
+  // Fallback: Resend API (if configured)
+  if (resendApiKey) {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${resendApiKey}`,
+      },
+      body: JSON.stringify({
+        ...payload,
+        to: [message.to],
+      }),
+    });
+
+    if (!res.ok) {
+      console.error('Resend failed:', res.status, await res.text());
+    }
+
+    return;
+  }
+
+  // Last resort: log so orders are never silently lost
+  console.log('STORE EMAIL (no email configured):', message);
+}
 
 async function sendOrderNotificationEmail(orderDetails: {
   productName: string;
@@ -30,8 +92,6 @@ async function sendOrderNotificationEmail(orderDetails: {
     country: string;
   } | null;
 }) {
-  const resendApiKey = process.env.RESEND_API_KEY;
-
   const {
     productName,
     amountPaid,
@@ -68,48 +128,72 @@ async function sendOrderNotificationEmail(orderDetails: {
     shippingAddress,
   });
 
-  // Primary: n8n webhook (self-hosted, no external service)
-  const n8nWebhookUrl = process.env.N8N_ORDER_WEBHOOK_URL;
-  if (n8nWebhookUrl) {
-    try {
-      await fetch(n8nWebhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          subject,
-          text: emailBody,
-          html: htmlBody,
-          to: ORDER_NOTIFICATION_EMAIL,
-        }),
-      });
-      return;
-    } catch (err) {
-      console.error('n8n webhook failed, falling back to log:', err);
-    }
-  }
+  await sendStoreEmail({
+    subject,
+    text: emailBody,
+    html: htmlBody,
+    to: ORDER_NOTIFICATION_EMAIL,
+  });
+}
 
-  // Fallback: Resend API (if configured)
-  if (resendApiKey) {
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${resendApiKey}`,
-      },
-      body: JSON.stringify({
-        from: 'Brain Rot Books Orders <orders@thebrainrotbooks.com>',
-        to: [ORDER_NOTIFICATION_EMAIL],
-        subject,
-        text: emailBody,
-        html: htmlBody,
-      }),
-    });
-    if (!res.ok) console.error('Resend failed:', res.status, await res.text());
+async function sendCustomerConfirmationEmail(orderDetails: {
+  productName: string;
+  amountPaid: number;
+  orderId: string;
+  customerEmail: string;
+  customerName: string;
+  shippingAddress: {
+    line1: string;
+    line2: string | null;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+  } | null;
+}) {
+  if (!orderDetails.customerEmail) {
     return;
   }
 
-  // Last resort: log so orders are never silently lost
-  console.log('ORDER NOTIFICATION (no email configured):', emailBody);
+  const amountFormatted = `$${(orderDetails.amountPaid / 100).toFixed(2)}`;
+
+  const { html, subject } = await renderOrderConfirmationEmail({
+    customerName: orderDetails.customerName,
+    orderId: orderDetails.orderId,
+    items: [
+      {
+        title: orderDetails.productName,
+        quantity: 1,
+        price: amountFormatted,
+      },
+    ],
+    total: amountFormatted,
+    shippingAddress: orderDetails.shippingAddress
+      ? {
+          ...orderDetails.shippingAddress,
+          name: orderDetails.customerName,
+        }
+      : null,
+    estimatedDelivery:
+      'Signed copies are prepared by Zubair and shipped as soon as possible.',
+  });
+
+  const text = [
+    `Your Brain Rot Books order is confirmed.`,
+    '',
+    `Order ID: ${orderDetails.orderId}`,
+    `Product: ${orderDetails.productName}`,
+    `Total: ${amountFormatted}`,
+    '',
+    'Thank you for supporting Zubair and The Brain Rot Books.',
+  ].join('\n');
+
+  await sendStoreEmail({
+    to: orderDetails.customerEmail,
+    subject,
+    text,
+    html,
+  });
 }
 
 /**
@@ -209,6 +293,17 @@ export async function action({ request }: Route.ActionArgs) {
       shippingAddress,
     }).catch((err) => {
       console.error('Order notification email failed (non-fatal):', err);
+    });
+
+    await sendCustomerConfirmationEmail({
+      productName,
+      amountPaid: session.amount_total ?? 0,
+      orderId: session.id,
+      customerEmail: buyerEmail,
+      customerName: buyerName,
+      shippingAddress,
+    }).catch((err) => {
+      console.error('Customer confirmation email failed (non-fatal):', err);
     });
   }
 

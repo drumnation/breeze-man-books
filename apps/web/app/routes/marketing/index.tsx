@@ -55,14 +55,23 @@ const VIDEO_SLIDES = [
 ];
 
 export const loader = async (_args: Route.LoaderArgs) => {
+  const url = new URL(_args.request.url);
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
   const checkoutEnabled =
     !!stripeSecretKey && !stripeSecretKey.startsWith('sk_test_placeholder');
+  const checkoutStatus: 'success' | 'canceled' | null = url.searchParams.has(
+    'success',
+  )
+    ? 'success'
+    : url.searchParams.has('canceled')
+      ? 'canceled'
+      : null;
 
   return {
     merchantName: 'Breeze Man Books',
     checkoutEnabled,
+    checkoutStatus,
   };
 };
 
@@ -153,10 +162,12 @@ function VideoCarousel() {
 }
 
 export default function Index({ loaderData }: Route.ComponentProps) {
-  const { checkoutEnabled } = loaderData;
+  const { checkoutEnabled, checkoutStatus } = loaderData;
 
   return (
     <div className="flex flex-col">
+      <CheckoutStatusBanner status={checkoutStatus} />
+
       {/* HERO */}
       <section className="relative flex min-h-[80vh] items-center justify-center overflow-hidden bg-black text-white">
         <img
@@ -285,6 +296,44 @@ export default function Index({ loaderData }: Route.ComponentProps) {
         </div>
       </section>
     </div>
+  );
+}
+
+function CheckoutStatusBanner({
+  status,
+}: {
+  status: 'success' | 'canceled' | null;
+}) {
+  if (!status) {
+    return null;
+  }
+
+  const content =
+    status === 'success'
+      ? {
+          heading: 'Order confirmed',
+          message:
+            'Thank you for supporting Zubair and The Brain Rot Books. A receipt and order details are on their way to your email.',
+          className: 'border-emerald-700 bg-emerald-50 text-emerald-950',
+        }
+      : {
+          heading: 'Checkout canceled',
+          message: 'No charge was made. You can restart checkout anytime.',
+          className: 'border-amber-700 bg-amber-50 text-amber-950',
+        };
+
+  return (
+    <section
+      aria-live="polite"
+      className={`border-b-4 px-4 py-4 ${content.className}`}
+    >
+      <div className="mx-auto flex max-w-6xl flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm font-black tracking-wide uppercase">
+          {content.heading}
+        </p>
+        <p className="max-w-3xl text-sm font-bold">{content.message}</p>
+      </div>
+    </section>
   );
 }
 

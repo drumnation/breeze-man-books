@@ -9,7 +9,6 @@ import {
 import { ArrowLeft } from 'lucide-react';
 
 import { useCaptureException } from '@kit/monitoring/hooks';
-import { useUser } from '@kit/supabase/hooks/use-user';
 import { Button } from '@kit/ui/button';
 import { Heading } from '@kit/ui/heading';
 import { Trans } from '@kit/ui/trans';
@@ -44,7 +43,7 @@ export function RootErrorBoundary() {
 
         <body data-test={'root-error-boundary'}>
           <div className={'flex h-screen flex-1 flex-col'}>
-            <SiteHeaderContainer />
+            <SiteHeader />
 
             <div
               className={
@@ -102,10 +101,4 @@ export function RootErrorBoundary() {
       </html>
     </RootProviders>
   );
-}
-
-function SiteHeaderContainer() {
-  const user = useUser();
-
-  return <SiteHeader user={user.data || null} />;
 }
